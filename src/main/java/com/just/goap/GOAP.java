@@ -1,11 +1,10 @@
 package com.just.goap;
 
-import com.just.core.functional.option.Option;
 import com.just.goap.plan.GOAPPlan;
 import com.just.goap.plan.GOAPPlanner;
 import com.just.goap.state.GOAPMutableWorldState;
 import com.just.goap.state.GOAPWorldState;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +22,7 @@ public abstract class GOAP<T> {
 
     private final List<GOAPSensor<? super T>> sensors;
 
-    private @NotNull Option<GOAPPlan<T>> currentPlanOption;
+    private @Nullable GOAPPlan<T> currentPlan;
 
     private boolean isEnabled;
 
@@ -32,7 +31,7 @@ public abstract class GOAP<T> {
         this.actions = new HashSet<>();
         this.goals = new HashSet<>();
         this.sensors = new ArrayList<>();
-        this.currentPlanOption = Option.none();
+        this.currentPlan = null;
         this.isEnabled = true;
     }
 
@@ -66,20 +65,20 @@ public abstract class GOAP<T> {
         // Sense all world input that we need to.
         var worldState = sense(context);
 
-        if (currentPlanOption.isNone()) {
-            this.currentPlanOption = planner.createPlan(context, worldState, goals);
+        if (currentPlan == null) {
+            this.currentPlan = planner.createPlan(context, worldState, goals);
         }
 
-        currentPlanOption.ifSome(plan -> {
-            var planState = plan.update(context, worldState);
+        if (currentPlan != null) {
+            var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
-                case GOAPPlan.State.Failed ignored -> this.currentPlanOption = Option.none();
-                case GOAPPlan.State.Finished ignored -> this.currentPlanOption = Option.none();
-                case GOAPPlan.State.Invalid ignored -> this.currentPlanOption = Option.none();
+                case GOAPPlan.State.Failed ignored -> this.currentPlan = null;
+                case GOAPPlan.State.Finished ignored -> this.currentPlan = null;
+                case GOAPPlan.State.Invalid ignored -> this.currentPlan = null;
                 case GOAPPlan.State.InProgress ignored -> {/* NO-OP */}
             }
-        });
+        }
     }
 
     public void setEnabled(boolean enabled) {

@@ -1,12 +1,12 @@
 package com.just.goap.plan;
 
-import com.just.core.functional.option.Option;
 import com.just.goap.GOAP;
 import com.just.goap.GOAPAction;
 import com.just.goap.GOAPGoal;
 import com.just.goap.condition.GOAPConditionContainer;
 import com.just.goap.state.GOAPMutableWorldState;
 import com.just.goap.state.GOAPWorldState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ public class GOAPPlanner<T> {
         this.goap = goap;
     }
 
-    public Option<GOAPPlan<T>> createPlan(T context, GOAPWorldState currentState, Collection<GOAPGoal> goals) {
+    public @Nullable GOAPPlan<T> createPlan(T context, GOAPWorldState currentState, Collection<GOAPGoal> goals) {
         GOAPPlan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
@@ -28,11 +28,9 @@ public class GOAPPlanner<T> {
             // We need to find actions that satisfy these conditions.
             var desiredConditions = goal.getDesiredConditions();
 
-            var planOption = buildPlanForConditions(desiredConditions, currentState);
+            var plan = buildPlanForConditions(desiredConditions, currentState);
 
-            if (planOption.isSomeAnd(plan -> !plan.isEmpty())) {
-                var plan = planOption.unwrap();
-
+            if (plan != null && !plan.isEmpty()) {
                 var cost = plan.stream()
                     .map(action -> action.getCost(context, currentState))
                     .reduce(0.0f, Float::sum);
@@ -44,15 +42,15 @@ public class GOAPPlanner<T> {
             }
         }
 
-        return Option.ofNullable(bestPlan);
+        return bestPlan;
     }
 
-    private Option<List<GOAPAction<T>>> buildPlanForConditions(
+    private @Nullable List<GOAPAction<T>> buildPlanForConditions(
         GOAPConditionContainer desiredConditions,
         GOAPWorldState currentState
     ) {
         if (currentState.satisfies(desiredConditions)) {
-            return Option.some(List.of());
+            return List.of();
         }
 
         var plan = new ArrayList<GOAPAction<T>>();
@@ -71,10 +69,9 @@ public class GOAPPlanner<T> {
             var satisfied = false;
 
             for (var action : satisfyingActions) {
-                var subPlanOption = buildPlanForConditions(action.getPreconditions(), workingState);
+                var subPlan = buildPlanForConditions(action.getPreconditions(), workingState);
 
-                if (subPlanOption.isSome()) {
-                    var subPlan = subPlanOption.unwrap();
+                if (subPlan != null) {
                     plan.addAll(subPlan);
                     plan.add(action);
                     workingState.apply(action.getEffects());
@@ -84,10 +81,10 @@ public class GOAPPlanner<T> {
             }
 
             if (!satisfied) {
-                return Option.none();
+                return null;
             }
         }
 
-        return Option.some(plan);
+        return plan;
     }
 }
