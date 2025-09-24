@@ -74,10 +74,10 @@ public abstract class GOAP<T> {
             var planState = plan.update(context, worldState);
 
             switch (planState) {
-                case GOAPPlan.State.Failed failed -> this.currentPlanOption = Option.none();
-                case GOAPPlan.State.Finished finished -> this.currentPlanOption = Option.none();
-                case GOAPPlan.State.Invalid invalid -> this.currentPlanOption = Option.none();
-                case GOAPPlan.State.InProgress inProgress -> {}
+                case GOAPPlan.State.Failed ignored -> this.currentPlanOption = Option.none();
+                case GOAPPlan.State.Finished ignored -> this.currentPlanOption = Option.none();
+                case GOAPPlan.State.Invalid ignored -> this.currentPlanOption = Option.none();
+                case GOAPPlan.State.InProgress ignored -> {/* NO-OP */}
             }
         });
     }

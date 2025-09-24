@@ -28,14 +28,14 @@ public class GOAPPlan<T> {
 
     public State update(T context, GOAPWorldState currentState) {
         if (currentActionIndex >= actions.size()) {
-            return new State.Finished();
+            return State.Finished.INSTANCE;
         }
 
         var action = actions.get(currentActionIndex);
 
         if (!action.getPreconditions().satisfiedBy(currentState)) {
             action.onFinish(context, currentState, blackboard);
-            return new State.Invalid();
+            return State.Invalid.INSTANCE;
         }
 
         // If the world state already satisfies the effects of the action,
@@ -46,14 +46,16 @@ public class GOAPPlan<T> {
             return proceedToNextActionOrFinish();
         }
 
-        return new State.InProgress();
+        return State.InProgress.INSTANCE;
     }
 
     private @NotNull State proceedToNextActionOrFinish() {
         // Move to the next action index.
-        currentActionIndex += 1;
+        this.currentActionIndex += 1;
         // Evaluate based on current index if we've reached the end of the plan sequence or have more actions left.
-        return currentActionIndex >= actions.size() ? new State.Finished() : new State.InProgress();
+        return currentActionIndex >= actions.size()
+            ? State.Finished.INSTANCE
+            : State.InProgress.INSTANCE;
     }
 
     public Option<GOAPAction<T>> getCurrentAction() {
@@ -64,12 +66,20 @@ public class GOAPPlan<T> {
 
     public sealed interface State {
 
-        record Finished() implements State {}
+        enum Finished implements State {
+            INSTANCE
+        }
 
-        record Failed() implements State {}
+        enum Failed implements State {
+            INSTANCE
+        }
 
-        record InProgress() implements State {}
+        enum InProgress implements State {
+            INSTANCE
+        }
 
-        record Invalid() implements State {}
+        enum Invalid implements State {
+            INSTANCE
+        }
     }
 }
