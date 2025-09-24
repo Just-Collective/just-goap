@@ -22,4 +22,11 @@ public abstract class GOAPStateCache {
     public <T> T getOrDefault(TypedIdentifier<T> key, T defaultValue) {
         return (T) stateMap.getOrDefault(key, defaultValue);
     }
+
+    @Override
+    public String toString() {
+        return "GOAPStateCache{" +
+            "stateMap=" + stateMap +
+            '}';
+    }
 }
