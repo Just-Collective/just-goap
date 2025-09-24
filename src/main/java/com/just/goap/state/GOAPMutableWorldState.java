@@ -26,7 +26,7 @@ public class GOAPMutableWorldState extends GOAPWorldState {
     }
 
     public <T> void set(TypedIdentifier<T> key, UnaryOperator<T> unaryOperator, Supplier<T> supplyIfAbsent) {
-        var previousValue = get(key);
+        var previousValue = getOrNull(key);
         var mutatedValue = unaryOperator.apply(previousValue == null ? supplyIfAbsent.get() : previousValue);
 
         set(key, mutatedValue);

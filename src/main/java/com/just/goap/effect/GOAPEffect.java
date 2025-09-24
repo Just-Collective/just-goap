@@ -29,7 +29,7 @@ public sealed interface GOAPEffect<T> {
 
         @Override
         public void apply(GOAPMutableWorldState worldState) {
-            var existingValue = worldState.get(identifier);
+            var existingValue = worldState.getOrNull(identifier);
 
             if (existingValue != null) {
                 var updatedValue = consumer.apply(existingValue);

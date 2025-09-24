@@ -14,7 +14,7 @@ public class GOAPWorldState extends GOAPStateCache {
 
     public boolean satisfiedBy(GOAPWorldState worldState) {
         for (var entry : stateMap.entrySet()) {
-            var otherValue = worldState.get(entry.getKey());
+            var otherValue = worldState.getOrNull(entry.getKey());
 
             if (!entry.getValue().equals(otherValue)) {
                 return false;

@@ -16,7 +16,7 @@ public record GOAPCondition<T>(
 
     @SuppressWarnings("unchecked")
     public boolean satisfiedBy(GOAPWorldState worldState) {
-        var value = (T) worldState.get(identifier);
+        var value = (T) worldState.getOrNull(identifier);
         return value != null && expression.evaluate(value);
     }
 }

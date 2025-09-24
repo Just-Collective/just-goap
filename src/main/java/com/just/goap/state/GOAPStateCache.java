@@ -14,7 +14,7 @@ public abstract class GOAPStateCache {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> @Nullable T get(TypedIdentifier<T> key) {
+    public <T> @Nullable T getOrNull(TypedIdentifier<T> key) {
         return (T) stateMap.get(key);
     }
 
