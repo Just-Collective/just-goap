@@ -1,5 +1,6 @@
 package com.just.goap.plan;
 
+import com.just.core.functional.function.Lazy;
 import com.just.core.functional.option.Option;
 import com.just.goap.GOAPAction;
 import com.just.goap.GOAPGoal;
@@ -8,6 +9,7 @@ import com.just.goap.state.GOAPWorldState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GOAPPlan<T> {
 
@@ -17,12 +19,15 @@ public class GOAPPlan<T> {
 
     private final GOAPBlackboard blackboard;
 
+    private final Lazy<String> actionsString;
+
     private int currentActionIndex;
 
     public GOAPPlan(GOAPGoal goal, List<GOAPAction<T>> actions) {
         this.goal = goal;
         this.actions = actions;
         this.blackboard = new GOAPBlackboard();
+        this.actionsString = Lazy.of(() -> actions.stream().map(GOAPAction::getName).collect(Collectors.joining(", ")));
         this.currentActionIndex = 0;
     }
 
@@ -62,6 +67,16 @@ public class GOAPPlan<T> {
         return currentActionIndex >= actions.size()
             ? Option.none()
             : Option.some(actions.get(currentActionIndex));
+    }
+
+    @Override
+    public String toString() {
+        return "GOAPPlan{" +
+            "currentActionIndex=" + currentActionIndex +
+            ", blackboard=" + blackboard +
+            ", actions=[" + actionsString.get() +
+            "], goal=" + goal +
+            '}';
     }
 
     public sealed interface State {
