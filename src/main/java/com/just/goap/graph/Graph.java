@@ -120,11 +120,76 @@ public class Graph<T> {
         }
 
         public Graph<T> build() {
+            validateReachabilityOrThrow();
+
             return new Graph<>(
                 Collections.unmodifiableSet(availableActions),
                 Collections.unmodifiableSet(availableGoals),
                 Collections.unmodifiableMap(preconditionToSatisfyingActionsMap)
             );
         }
+
+        private void validateReachabilityOrThrow() {
+            // Validate unreachable goal conditions.
+            validateGoalReachabilityOrThrow();
+            // Validate dead-end actions.
+            validateActionContributionOrThrow();
+        }
+
+        private void validateActionContributionOrThrow() {
+            var usefulConditions = new HashSet<Condition<?>>();
+            var reachableActions = new HashSet<Action<T>>();
+
+            // Start from goal desired conditions.
+            for (var goal : availableGoals) {
+                usefulConditions.addAll(goal.getDesiredConditions().getConditions());
+            }
+
+            // Propagate backwards to find all useful conditions/actions.
+            boolean changed;
+            do {
+                changed = false;
+
+                for (var action : availableActions) {
+                    if (reachableActions.contains(action)) {
+                        continue;
+                    }
+
+                    // If action effects satisfy any useful condition
+                    var useful = usefulConditions.stream()
+                        .anyMatch(condition -> condition.satisfiedBy(action.getEffects()));
+
+                    if (useful) {
+                        reachableActions.add(action);
+
+                        for (var pre : action.getPreconditions().getConditions()) {
+                            if (usefulConditions.add(pre)) {
+                                changed = true;
+                            }
+                        }
+                        changed = true;
+                    }
+                }
+            } while (changed);
+
+            for (var action : availableActions) {
+                if (!reachableActions.contains(action)) {
+                    throw new IllegalStateException("Dead-end action: " + action + " has no contribution to any goal or precondition.");
+                }
+            }
+        }
+
+        private void validateGoalReachabilityOrThrow() {
+            for (var goal : availableGoals) {
+                for (var desiredCondition : goal.getDesiredConditions().getConditions()) {
+                    var satisfyingActions = preconditionToSatisfyingActionsMap.getOrDefault(desiredCondition, Set.of());
+
+                    if (satisfyingActions.isEmpty()) {
+                        throw new IllegalStateException("No action satisfies goal condition: " + desiredCondition + " in goal: " + goal);
+                    }
+                }
+            }
+        }
+
     }
 }
