@@ -174,7 +174,9 @@ public class Graph<T> {
 
             for (var action : availableActions) {
                 if (!reachableActions.contains(action)) {
-                    throw new IllegalStateException("Dead-end action: " + action + " has no contribution to any goal or precondition.");
+                    throw new IllegalStateException(
+                        "Dead-end action: " + action + " has no contribution to any goal or precondition."
+                    );
                 }
             }
         }
@@ -185,7 +187,9 @@ public class Graph<T> {
                     var satisfyingActions = preconditionToSatisfyingActionsMap.getOrDefault(desiredCondition, Set.of());
 
                     if (satisfyingActions.isEmpty()) {
-                        throw new IllegalStateException("No action satisfies goal condition: " + desiredCondition + " in goal: " + goal);
+                        throw new IllegalStateException(
+                            "No action satisfies goal condition: " + desiredCondition + " in goal: " + goal
+                        );
                     }
                 }
             }
