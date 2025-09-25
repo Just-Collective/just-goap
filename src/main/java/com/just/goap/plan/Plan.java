@@ -45,7 +45,7 @@ public class Plan<T> {
 
         // If the world state already satisfies the effects of the action,
         // OR check if the action is finished after performing...
-        if (currentState.satisfies(action.getEffects()) || action.perform(context, currentState, blackboard)) {
+        if (currentState.satisfies(action.getEffectContainer()) || action.perform(context, currentState, blackboard)) {
             // Then the action can be considered complete, move on to the next action or finish.
             action.onFinish(context, currentState, blackboard);
             return proceedToNextActionOrFinish();

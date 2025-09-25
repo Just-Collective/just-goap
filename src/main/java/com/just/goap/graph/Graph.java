@@ -73,7 +73,7 @@ public class Graph<T> {
 
                 // Check if any existing action satisfies it.
                 for (var action : availableActions) {
-                    if (condition.satisfiedBy(action.getEffects())) {
+                    if (condition.satisfiedBy(action.getEffectContainer())) {
                         actions.add(action);
                     }
                 }
@@ -83,13 +83,13 @@ public class Graph<T> {
         }
 
         public Builder<T> addAction(Action<T> action) {
-            if (action.getEffects().getEffects().isEmpty()) {
+            if (action.getEffectContainer().getEffects().isEmpty()) {
                 throw new IllegalArgumentException("Action must have at least one effect: " + action);
             }
 
             availableActions.add(action);
 
-            var effects = action.getEffects();
+            var effects = action.getEffectContainer();
             // Collect all newly added preconditions.
             var newPreconditions = new HashSet<Condition<?>>();
 
@@ -118,7 +118,7 @@ public class Graph<T> {
                         continue;
                     }
 
-                    if (newPrecondition.satisfiedBy(otherAction.getEffects())) {
+                    if (newPrecondition.satisfiedBy(otherAction.getEffectContainer())) {
                         actions.add(otherAction);
                     }
                 }
@@ -165,7 +165,7 @@ public class Graph<T> {
 
                     // If action effects satisfy any useful condition
                     var useful = usefulConditions.stream()
-                        .anyMatch(condition -> condition.satisfiedBy(action.getEffects()));
+                        .anyMatch(condition -> condition.satisfiedBy(action.getEffectContainer()));
 
                     if (useful) {
                         reachableActions.add(action);

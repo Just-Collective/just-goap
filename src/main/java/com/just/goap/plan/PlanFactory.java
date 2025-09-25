@@ -82,7 +82,7 @@ public class PlanFactory {
                     // The plan to arrive at our current action was valid, so the action itself is also valid. Add it.
                     plan.add(action);
                     // Update our working state with the action's effects to simulate the action being done.
-                    workingState.apply(action.getEffects());
+                    workingState.apply(action.getEffectContainer());
                     satisfied = true;
                     break;
                 }

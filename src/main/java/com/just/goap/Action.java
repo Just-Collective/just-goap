@@ -43,7 +43,7 @@ public abstract class Action<T> {
         return 0.0F;
     }
 
-    public EffectContainer getEffects() {
+    public EffectContainer getEffectContainer() {
         return effects;
     }
 
