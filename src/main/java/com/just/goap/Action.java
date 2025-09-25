@@ -51,7 +51,7 @@ public abstract class Action<T> {
         return name;
     }
 
-    public ConditionContainer getPreconditions() {
+    public ConditionContainer getPreconditionContainer() {
         return preconditions;
     }
 }

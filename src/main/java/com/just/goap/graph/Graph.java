@@ -93,7 +93,7 @@ public class Graph<T> {
             // Collect all newly added preconditions.
             var newPreconditions = new HashSet<Condition<?>>();
 
-            for (var precondition : action.getPreconditions().getConditions()) {
+            for (var precondition : action.getPreconditionContainer().getConditions()) {
                 preconditionToSatisfyingActionsMap.computeIfAbsent(precondition, $ -> {
                     // Track brand new condition.
                     newPreconditions.add(precondition);
@@ -170,7 +170,7 @@ public class Graph<T> {
                     if (useful) {
                         reachableActions.add(action);
 
-                        for (var pre : action.getPreconditions().getConditions()) {
+                        for (var pre : action.getPreconditionContainer().getConditions()) {
                             if (usefulConditions.add(pre)) {
                                 changed = true;
                             }

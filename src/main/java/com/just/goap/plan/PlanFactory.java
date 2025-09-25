@@ -74,7 +74,7 @@ public class PlanFactory {
             for (var action : satisfyingActions) {
                 // Build a subplan for the current action. Every action has preconditions, and like our original
                 // desired conditions, we need to make sure we have a viable plan to solve those preconditions.
-                var subPlan = buildPlanForConditions(graph, action.getPreconditions(), workingState);
+                var subPlan = buildPlanForConditions(graph, action.getPreconditionContainer(), workingState);
 
                 if (subPlan != null) {
                     // If sub plan is valid, it will be non-null. We can add all of its actions to our current plan.

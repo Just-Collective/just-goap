@@ -38,7 +38,7 @@ public class Plan<T> {
 
         var action = actions.get(currentActionIndex);
 
-        if (!action.getPreconditions().satisfiedBy(currentState)) {
+        if (!action.getPreconditionContainer().satisfiedBy(currentState)) {
             action.onFinish(context, currentState, blackboard);
             return State.Invalid.INSTANCE;
         }
