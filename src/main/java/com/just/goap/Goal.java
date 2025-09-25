@@ -1,21 +1,21 @@
 package com.just.goap;
 
-import com.just.goap.condition.GOAPConditionContainer;
+import com.just.goap.condition.ConditionContainer;
 
-public abstract class GOAPGoal {
+public abstract class Goal {
 
-    private final GOAPConditionContainer desiredConditions;
+    private final ConditionContainer desiredConditions;
 
     private final String name;
 
-    protected GOAPGoal() {
+    protected Goal() {
         this.desiredConditions = createDesiredConditions();
         this.name = this.getClass().getSimpleName();
     }
 
-    protected abstract GOAPConditionContainer createDesiredConditions();
+    protected abstract ConditionContainer createDesiredConditions();
 
-    public GOAPConditionContainer getDesiredConditions() {
+    public ConditionContainer getDesiredConditions() {
         return desiredConditions;
     }
 

@@ -1,8 +1,8 @@
 package com.just.goap.graph;
 
-import com.just.goap.GOAPAction;
-import com.just.goap.GOAPGoal;
-import com.just.goap.condition.GOAPCondition;
+import com.just.goap.Action;
+import com.just.goap.Goal;
+import com.just.goap.condition.Condition;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,47 +10,47 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class GOAPGraph<T> {
+public class Graph<T> {
 
     public static <T> Builder<T> builder() {
         return new Builder<>();
     }
 
-    private final Set<GOAPAction<T>> availableActions;
+    private final Set<Action<T>> availableActions;
 
-    private final Set<GOAPGoal> availableGoals;
+    private final Set<Goal> availableGoals;
 
-    private final Map<GOAPCondition<?>, Set<GOAPAction<T>>> preconditionToSatisfyingActionsMap;
+    private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-    private GOAPGraph(
-        Set<GOAPAction<T>> availableActions,
-        Set<GOAPGoal> availableGoals,
-        Map<GOAPCondition<?>, Set<GOAPAction<T>>> preconditionToSatisfyingActionsMap
+    private Graph(
+        Set<Action<T>> availableActions,
+        Set<Goal> availableGoals,
+        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
         this.preconditionToSatisfyingActionsMap = preconditionToSatisfyingActionsMap;
     }
 
-    public Set<GOAPAction<T>> getAvailableActions() {
+    public Set<Action<T>> getAvailableActions() {
         return availableActions;
     }
 
-    public Set<GOAPGoal> getAvailableGoals() {
+    public Set<Goal> getAvailableGoals() {
         return availableGoals;
     }
 
-    public Set<GOAPAction<T>> getActionsThatSatisfy(GOAPCondition<?> condition) {
+    public Set<Action<T>> getActionsThatSatisfy(Condition<?> condition) {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
     public static class Builder<T> {
 
-        private final Set<GOAPAction<T>> availableActions;
+        private final Set<Action<T>> availableActions;
 
-        private final Set<GOAPGoal> availableGoals;
+        private final Set<Goal> availableGoals;
 
-        private final Map<GOAPCondition<?>, Set<GOAPAction<T>>> preconditionToSatisfyingActionsMap;
+        private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
         private Builder() {
             this.availableActions = new HashSet<>();
@@ -58,7 +58,7 @@ public class GOAPGraph<T> {
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
         }
 
-        public Builder<T> addGoal(GOAPGoal goal) {
+        public Builder<T> addGoal(Goal goal) {
             availableGoals.add(goal);
 
             var newConditions = goal.getDesiredConditions().getConditions();
@@ -78,12 +78,12 @@ public class GOAPGraph<T> {
             return this;
         }
 
-        public Builder<T> addAction(GOAPAction<T> action) {
+        public Builder<T> addAction(Action<T> action) {
             availableActions.add(action);
 
             var effects = action.getEffects();
             // Collect all newly added preconditions.
-            var newPreconditions = new HashSet<GOAPCondition<?>>();
+            var newPreconditions = new HashSet<Condition<?>>();
 
             for (var precondition : action.getPreconditions().getConditions()) {
                 preconditionToSatisfyingActionsMap.computeIfAbsent(precondition, $ -> {
@@ -119,8 +119,8 @@ public class GOAPGraph<T> {
             return this;
         }
 
-        public GOAPGraph<T> build() {
-            return new GOAPGraph<>(
+        public Graph<T> build() {
+            return new Graph<>(
                 Collections.unmodifiableSet(availableActions),
                 Collections.unmodifiableSet(availableGoals),
                 Collections.unmodifiableMap(preconditionToSatisfyingActionsMap)

@@ -4,9 +4,9 @@ import com.just.goap.TypedIdentifier;
 
 import java.util.HashMap;
 
-public class GOAPBlackboard extends GOAPStateCache {
+public class Blackboard extends StateCache {
 
-    public GOAPBlackboard() {
+    public Blackboard() {
         super(new HashMap<>());
     }
 

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public sealed interface GOAPExpression<T> {
+public sealed interface Expression<T> {
 
     static <T> Contains<T> contains(T expected) {
         return new Contains<>(expected);
@@ -45,13 +45,13 @@ public sealed interface GOAPExpression<T> {
         return new IsNone<>();
     }
 
-    static <T> GOAPExpression<T> where(Predicate<? super T> predicate, String description) {
+    static <T> Expression<T> where(Predicate<? super T> predicate, String description) {
         return new Where<>(predicate, description);
     }
 
     boolean evaluate(@NotNull T actual);
 
-    final class Contains<T> implements GOAPExpression<Collection<T>> {
+    final class Contains<T> implements Expression<Collection<T>> {
 
         private final T expected;
 
@@ -70,7 +70,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class DoesNotEqual<T> implements GOAPExpression<T> {
+    final class DoesNotEqual<T> implements Expression<T> {
 
         private final T expected;
 
@@ -89,7 +89,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class Equals<T> implements GOAPExpression<T> {
+    final class Equals<T> implements Expression<T> {
 
         private final T expected;
 
@@ -108,7 +108,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class GreaterThan<T extends Comparable<T>> implements GOAPExpression<T> {
+    final class GreaterThan<T extends Comparable<T>> implements Expression<T> {
 
         private final T threshold;
 
@@ -127,7 +127,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class IsSome<T extends Option<?>> implements GOAPExpression<T> {
+    final class IsSome<T extends Option<?>> implements Expression<T> {
 
         private IsSome() {}
 
@@ -142,7 +142,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class IsNone<T extends Option<?>> implements GOAPExpression<T> {
+    final class IsNone<T extends Option<?>> implements Expression<T> {
 
         private IsNone() {}
 
@@ -157,7 +157,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class LessThan<T extends Comparable<T>> implements GOAPExpression<T> {
+    final class LessThan<T extends Comparable<T>> implements Expression<T> {
 
         private final T threshold;
 
@@ -176,7 +176,7 @@ public sealed interface GOAPExpression<T> {
         }
     }
 
-    final class Where<T> implements GOAPExpression<T> {
+    final class Where<T> implements Expression<T> {
 
         private final Predicate<? super T> predicate;
 

@@ -1,23 +1,23 @@
 package com.just.goap.effect;
 
 import com.just.goap.TypedIdentifier;
-import com.just.goap.state.GOAPMutableWorldState;
+import com.just.goap.state.MutableWorldState;
 
 import java.util.function.UnaryOperator;
 
-public sealed interface GOAPEffect<T> {
+public sealed interface Effect<T> {
 
     TypedIdentifier<T> identifier();
 
-    void apply(GOAPMutableWorldState worldState);
+    void apply(MutableWorldState worldState);
 
     record Value<T>(
         TypedIdentifier<T> identifier,
         T value
-    ) implements GOAPEffect<T> {
+    ) implements Effect<T> {
 
         @Override
-        public void apply(GOAPMutableWorldState worldState) {
+        public void apply(MutableWorldState worldState) {
             worldState.set(identifier, value);
         }
     }
@@ -25,10 +25,10 @@ public sealed interface GOAPEffect<T> {
     record Dynamic<T>(
         TypedIdentifier<T> identifier,
         UnaryOperator<T> consumer
-    ) implements GOAPEffect<T> {
+    ) implements Effect<T> {
 
         @Override
-        public void apply(GOAPMutableWorldState worldState) {
+        public void apply(MutableWorldState worldState) {
             var existingValue = worldState.getOrNull(identifier);
 
             if (existingValue != null) {

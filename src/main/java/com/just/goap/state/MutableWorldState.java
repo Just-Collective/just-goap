@@ -1,23 +1,23 @@
 package com.just.goap.state;
 
 import com.just.goap.TypedIdentifier;
-import com.just.goap.effect.GOAPEffectContainer;
+import com.just.goap.effect.EffectContainer;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-public class GOAPMutableWorldState extends GOAPWorldState {
+public class MutableWorldState extends WorldState {
 
-    public GOAPMutableWorldState() {
+    public MutableWorldState() {
         this(new HashMap<>());
     }
 
-    public GOAPMutableWorldState(GOAPWorldState worldState) {
+    public MutableWorldState(WorldState worldState) {
         this(new HashMap<>(worldState.stateMap));
     }
 
-    public GOAPMutableWorldState(HashMap<TypedIdentifier<?>, Object> stateMap) {
+    public MutableWorldState(HashMap<TypedIdentifier<?>, Object> stateMap) {
         super(stateMap);
     }
 
@@ -32,7 +32,7 @@ public class GOAPMutableWorldState extends GOAPWorldState {
         set(key, mutatedValue);
     }
 
-    public void apply(GOAPEffectContainer effectContainer) {
+    public void apply(EffectContainer effectContainer) {
         effectContainer.getEffects().forEach(effect -> effect.apply(this));
     }
 }

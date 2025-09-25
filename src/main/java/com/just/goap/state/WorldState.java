@@ -1,18 +1,18 @@
 package com.just.goap.state;
 
 import com.just.goap.TypedIdentifier;
-import com.just.goap.condition.GOAPConditionContainer;
-import com.just.goap.effect.GOAPEffectContainer;
+import com.just.goap.condition.ConditionContainer;
+import com.just.goap.effect.EffectContainer;
 
 import java.util.Map;
 
-public class GOAPWorldState extends GOAPStateCache {
+public class WorldState extends StateCache {
 
-    public GOAPWorldState(Map<TypedIdentifier<?>, Object> stateMap) {
+    public WorldState(Map<TypedIdentifier<?>, Object> stateMap) {
         super(stateMap);
     }
 
-    public boolean satisfiedBy(GOAPWorldState worldState) {
+    public boolean satisfiedBy(WorldState worldState) {
         for (var entry : stateMap.entrySet()) {
             var otherValue = worldState.getOrNull(entry.getKey());
 
@@ -24,12 +24,12 @@ public class GOAPWorldState extends GOAPStateCache {
         return true;
     }
 
-    public boolean satisfies(GOAPEffectContainer effectContainer) {
+    public boolean satisfies(EffectContainer effectContainer) {
         return effectContainer.toWorldState()
             .satisfiedBy(this);
     }
 
-    public boolean satisfies(GOAPConditionContainer conditionContainer) {
+    public boolean satisfies(ConditionContainer conditionContainer) {
         return conditionContainer.satisfiedBy(this);
     }
 }

@@ -5,11 +5,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public abstract class GOAPStateCache {
+public abstract class StateCache {
 
     protected final Map<TypedIdentifier<?>, Object> stateMap;
 
-    protected GOAPStateCache(Map<TypedIdentifier<?>, Object> stateMap) {
+    protected StateCache(Map<TypedIdentifier<?>, Object> stateMap) {
         this.stateMap = stateMap;
     }
 
@@ -25,7 +25,7 @@ public abstract class GOAPStateCache {
 
     @Override
     public String toString() {
-        return "GOAPStateCache{" +
+        return "StateCache{" +
             "stateMap=" + stateMap +
             '}';
     }

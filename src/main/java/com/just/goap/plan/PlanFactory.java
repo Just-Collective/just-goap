@@ -1,19 +1,19 @@
 package com.just.goap.plan;
 
-import com.just.goap.GOAPAction;
-import com.just.goap.condition.GOAPConditionContainer;
-import com.just.goap.graph.GOAPGraph;
-import com.just.goap.state.GOAPMutableWorldState;
-import com.just.goap.state.GOAPWorldState;
+import com.just.goap.Action;
+import com.just.goap.condition.ConditionContainer;
+import com.just.goap.graph.Graph;
+import com.just.goap.state.MutableWorldState;
+import com.just.goap.state.WorldState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GOAPPlanFactory {
+public class PlanFactory {
 
-    public static <T> @Nullable GOAPPlan<T> create(GOAPGraph<T> graph, T context, GOAPWorldState currentState) {
-        GOAPPlan<T> bestPlan = null;
+    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, WorldState currentState) {
+        Plan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
         for (var goal : graph.getAvailableGoals()) {
@@ -31,7 +31,7 @@ public class GOAPPlanFactory {
 
                 if (cost < bestCost) {
                     bestCost = cost;
-                    bestPlan = new GOAPPlan<>(goal, plan);
+                    bestPlan = new Plan<>(goal, plan);
                 }
             }
         }
@@ -39,10 +39,10 @@ public class GOAPPlanFactory {
         return bestPlan;
     }
 
-    private static <T> @Nullable List<GOAPAction<T>> buildPlanForConditions(
-        GOAPGraph<T> graph,
-        GOAPConditionContainer desiredConditions,
-        GOAPWorldState currentState
+    private static <T> @Nullable List<Action<T>> buildPlanForConditions(
+        Graph<T> graph,
+        ConditionContainer desiredConditions,
+        WorldState currentState
     ) {
         if (currentState.satisfies(desiredConditions)) {
             // The current world state already satisfies the desired conditions, there are no further actions necessary
@@ -51,9 +51,9 @@ public class GOAPPlanFactory {
         }
 
         // Prepare a new plan (sequential list of actions).
-        var plan = new ArrayList<GOAPAction<T>>();
+        var plan = new ArrayList<Action<T>>();
         // Create a working world state. We will use this to "simulate" the effects of actions on the world state.
-        var workingState = new GOAPMutableWorldState(currentState);
+        var workingState = new MutableWorldState(currentState);
 
         // For every desired condition, we need to figure out if the condition is already satisfied.
         for (var condition : desiredConditions.getConditions()) {
@@ -97,7 +97,7 @@ public class GOAPPlanFactory {
         return plan;
     }
 
-    private GOAPPlanFactory() {
+    private PlanFactory() {
         throw new UnsupportedOperationException();
     }
 }
