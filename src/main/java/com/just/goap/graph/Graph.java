@@ -79,6 +79,10 @@ public class Graph<T> {
         }
 
         public Builder<T> addAction(Action<T> action) {
+            if (action.getEffects().getEffects().isEmpty()) {
+                throw new IllegalArgumentException("Action must have at least one effect: " + action);
+            }
+
             availableActions.add(action);
 
             var effects = action.getEffects();
