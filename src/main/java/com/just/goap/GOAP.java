@@ -10,11 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class GOAP<T> {
+public class GOAP<T> {
 
     private final GOAPGraph<T> graph;
-
-    private final GOAPPlanner<T> planner;
 
     private final List<GOAPSensor<? super T>> sensors;
 
@@ -24,7 +22,6 @@ public abstract class GOAP<T> {
 
     protected GOAP(GOAPGraph<T> graph) {
         this.graph = graph;
-        this.planner = new GOAPPlanner<>(this);
         this.sensors = new ArrayList<>();
         this.currentPlan = null;
         this.isEnabled = true;
@@ -53,7 +50,7 @@ public abstract class GOAP<T> {
         var worldState = sense(context);
 
         if (currentPlan == null) {
-            this.currentPlan = planner.createPlan(context, worldState, graph.getAvailableGoals());
+            this.currentPlan = GOAPPlanner.createPlan(graph, context, worldState);
         }
 
         if (currentPlan != null) {

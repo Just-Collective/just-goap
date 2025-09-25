@@ -1,34 +1,26 @@
 package com.just.goap.plan;
 
-import com.just.goap.GOAP;
 import com.just.goap.GOAPAction;
-import com.just.goap.GOAPGoal;
 import com.just.goap.condition.GOAPConditionContainer;
+import com.just.goap.graph.GOAPGraph;
 import com.just.goap.state.GOAPMutableWorldState;
 import com.just.goap.state.GOAPWorldState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class GOAPPlanner<T> {
+public class GOAPPlanner {
 
-    private final GOAP<T> goap;
-
-    public GOAPPlanner(GOAP<T> goap) {
-        this.goap = goap;
-    }
-
-    public @Nullable GOAPPlan<T> createPlan(T context, GOAPWorldState currentState, Collection<GOAPGoal> goals) {
+    public static <T> @Nullable GOAPPlan<T> createPlan(GOAPGraph<T> graph, T context, GOAPWorldState currentState) {
         GOAPPlan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
-        for (var goal : goals) {
+        for (var goal : graph.getAvailableGoals()) {
             // We need to find actions that satisfy these conditions.
             var desiredConditions = goal.getDesiredConditions();
 
-            var plan = buildPlanForConditions(desiredConditions, currentState);
+            var plan = buildPlanForConditions(graph, desiredConditions, currentState);
 
             if (plan != null && !plan.isEmpty()) {
                 // FIXME: The cost-per-action here is evaluated using the wrong world state. We need to use the
@@ -47,7 +39,8 @@ public class GOAPPlanner<T> {
         return bestPlan;
     }
 
-    private @Nullable List<GOAPAction<T>> buildPlanForConditions(
+    private static <T> @Nullable List<GOAPAction<T>> buildPlanForConditions(
+        GOAPGraph<T> graph,
         GOAPConditionContainer desiredConditions,
         GOAPWorldState currentState
     ) {
@@ -70,7 +63,7 @@ public class GOAPPlanner<T> {
             }
 
             // The condition is not satisfied by the working world state, get actions that can satisfy the condition.
-            var satisfyingActions = goap.getGraph().getActionsThatSatisfy(condition);
+            var satisfyingActions = graph.getActionsThatSatisfy(condition);
 
             var satisfied = false;
 
@@ -81,7 +74,7 @@ public class GOAPPlanner<T> {
             for (var action : satisfyingActions) {
                 // Build a subplan for the current action. Every action has preconditions, and like our original
                 // desired conditions, we need to make sure we have a viable plan to solve those preconditions.
-                var subPlan = buildPlanForConditions(action.getPreconditions(), workingState);
+                var subPlan = buildPlanForConditions(graph, action.getPreconditions(), workingState);
 
                 if (subPlan != null) {
                     // If sub plan is valid, it will be non-null. We can add all of its actions to our current plan.
@@ -102,5 +95,9 @@ public class GOAPPlanner<T> {
         }
 
         return plan;
+    }
+
+    private GOAPPlanner() {
+        throw new UnsupportedOperationException();
     }
 }
