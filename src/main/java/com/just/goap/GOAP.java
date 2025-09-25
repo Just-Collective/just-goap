@@ -1,5 +1,6 @@
 package com.just.goap;
 
+import com.just.goap.graph.GOAPGraph;
 import com.just.goap.plan.GOAPPlan;
 import com.just.goap.plan.GOAPPlanner;
 import com.just.goap.state.GOAPMutableWorldState;
@@ -7,16 +8,11 @@ import com.just.goap.state.GOAPWorldState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public abstract class GOAP<T> {
 
-    private final Set<GOAPAction<T>> actions;
-
-    private final Set<GOAPGoal> goals;
+    private final GOAPGraph<T> graph;
 
     private final GOAPPlanner<T> planner;
 
@@ -26,21 +22,12 @@ public abstract class GOAP<T> {
 
     private boolean isEnabled;
 
-    protected GOAP() {
+    protected GOAP(GOAPGraph<T> graph) {
+        this.graph = graph;
         this.planner = new GOAPPlanner<>(this);
-        this.actions = new HashSet<>();
-        this.goals = new HashSet<>();
         this.sensors = new ArrayList<>();
         this.currentPlan = null;
         this.isEnabled = true;
-    }
-
-    public void addAction(GOAPAction<T> action) {
-        actions.add(action);
-    }
-
-    public void addGoal(GOAPGoal goal) {
-        goals.add(goal);
     }
 
     public void addSensor(GOAPSensor<? super T> sensor) {
@@ -66,7 +53,7 @@ public abstract class GOAP<T> {
         var worldState = sense(context);
 
         if (currentPlan == null) {
-            this.currentPlan = planner.createPlan(context, worldState, goals);
+            this.currentPlan = planner.createPlan(context, worldState, graph.getAvailableGoals());
         }
 
         if (currentPlan != null) {
@@ -85,7 +72,7 @@ public abstract class GOAP<T> {
         isEnabled = enabled;
     }
 
-    public Collection<GOAPAction<T>> getAvailableActions() {
-        return actions;
+    public GOAPGraph<T> getGraph() {
+        return graph;
     }
 }

@@ -69,13 +69,8 @@ public class GOAPPlanner<T> {
                 continue;
             }
 
-            // The current condition is not satisfied by the working world state, so we now need to find all available
-            // actions that can satisfy this condition.
-            // TODO: For a given condition, we should be able to compute a O(1) lookup map of actions that satisfy it.
-            var satisfyingActions = goap.getAvailableActions()
-                .stream()
-                .filter(action -> condition.satisfiedBy(action.getEffects()))
-                .toList();
+            // The condition is not satisfied by the working world state, get actions that can satisfy the condition.
+            var satisfyingActions = goap.getGraph().getActionsThatSatisfy(condition);
 
             var satisfied = false;
 
