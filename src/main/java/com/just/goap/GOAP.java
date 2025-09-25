@@ -2,7 +2,7 @@ package com.just.goap;
 
 import com.just.goap.graph.GOAPGraph;
 import com.just.goap.plan.GOAPPlan;
-import com.just.goap.plan.GOAPPlanner;
+import com.just.goap.plan.GOAPPlanFactory;
 import com.just.goap.state.GOAPMutableWorldState;
 import com.just.goap.state.GOAPWorldState;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +50,7 @@ public class GOAP<T> {
         var worldState = sense(context);
 
         if (currentPlan == null) {
-            this.currentPlan = GOAPPlanner.createPlan(graph, context, worldState);
+            this.currentPlan = GOAPPlanFactory.create(graph, context, worldState);
         }
 
         if (currentPlan != null) {

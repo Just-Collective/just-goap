@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GOAPPlanner {
+public class GOAPPlanFactory {
 
-    public static <T> @Nullable GOAPPlan<T> createPlan(GOAPGraph<T> graph, T context, GOAPWorldState currentState) {
+    public static <T> @Nullable GOAPPlan<T> create(GOAPGraph<T> graph, T context, GOAPWorldState currentState) {
         GOAPPlan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
@@ -97,7 +97,7 @@ public class GOAPPlanner {
         return plan;
     }
 
-    private GOAPPlanner() {
+    private GOAPPlanFactory() {
         throw new UnsupportedOperationException();
     }
 }
