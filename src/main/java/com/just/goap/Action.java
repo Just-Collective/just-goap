@@ -18,13 +18,10 @@ public abstract class Action<T> {
 
     private final MutableConditionContainer preconditions;
 
-    protected float cost;
-
     public Action() {
         this.effects = new MutableEffectContainer();
         this.name = this.getClass().getSimpleName();
         this.preconditions = new MutableConditionContainer();
-        this.cost = 1.0f;
     }
 
     protected final <U> void addPrecondition(
@@ -43,7 +40,7 @@ public abstract class Action<T> {
     public void onFinish(T context, WorldState worldState, Blackboard blackboard) {}
 
     public float getCost(T context, WorldState worldState) {
-        return cost;
+        return 0.0F;
     }
 
     public EffectContainer getEffects() {
