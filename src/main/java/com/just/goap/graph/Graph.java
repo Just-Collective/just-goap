@@ -59,11 +59,15 @@ public class Graph<T> {
         }
 
         public Builder<T> addGoal(Goal goal) {
+            var desiredConditions = goal.getDesiredConditions().getConditions();
+
+            if (desiredConditions.isEmpty()) {
+                throw new IllegalArgumentException("Goal must specify at least one desired condition: " + goal);
+            }
+
             availableGoals.add(goal);
 
-            var newConditions = goal.getDesiredConditions().getConditions();
-
-            for (var condition : newConditions) {
+            for (var condition : desiredConditions) {
                 // Ensure condition is in map.
                 var actions = preconditionToSatisfyingActionsMap.computeIfAbsent(condition, $ -> new HashSet<>());
 
