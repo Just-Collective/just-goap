@@ -54,4 +54,9 @@ public abstract class Action<T> {
     public ConditionContainer getPreconditionContainer() {
         return preconditions;
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
