@@ -52,4 +52,7 @@ public class ConditionContainer {
         return new ConditionContainer(new ArrayList<>(combined));
     }
 
+    public boolean isEmpty() {
+        return conditions.isEmpty();
+    }
 }
