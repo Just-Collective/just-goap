@@ -4,6 +4,7 @@ import com.just.goap.state.WorldState;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ConditionContainer {
@@ -32,6 +33,15 @@ public class ConditionContainer {
             .collect(Collectors.toList());
 
         return new ConditionContainer(unsatisfied);
+    }
+
+    public ConditionContainer without(Condition<?>... toRemove) {
+        var removeSet = Set.of(toRemove);
+        var remaining = conditions.stream()
+            .filter(cond -> !removeSet.contains(cond))
+            .toList();
+
+        return new ConditionContainer(remaining);
     }
 
 }
