@@ -3,7 +3,6 @@ package com.just.goap.condition;
 import com.just.goap.state.WorldState;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +11,11 @@ import java.util.stream.Collectors;
 public class ConditionContainer {
 
     public static ConditionContainer of(Condition<?>... conditions) {
-        return new ConditionContainer(Arrays.stream(conditions).toList());
+        return of(List.of(conditions));
+    }
+
+    public static ConditionContainer of(List<Condition<?>> conditions) {
+        return new ConditionContainer(conditions);
     }
 
     protected final List<Condition<?>> conditions;
