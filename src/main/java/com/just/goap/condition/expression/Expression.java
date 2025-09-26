@@ -9,6 +9,14 @@ import java.util.function.Predicate;
 
 public sealed interface Expression<T> {
 
+    Equals<Boolean> FALSE = equalTo(false);
+
+    IsNone<?> IS_NONE = isNone();
+
+    IsSome<?> IS_SOME = isSome();
+
+    Equals<Boolean> TRUE = equalTo(true);
+
     static <T> Contains<T> contains(T expected) {
         return new Contains<>(expected);
     }
@@ -22,11 +30,11 @@ public sealed interface Expression<T> {
     }
 
     static Equals<Boolean> isFalse() {
-        return equalTo(false);
+        return FALSE;
     }
 
     static Equals<Boolean> isTrue() {
-        return equalTo(true);
+        return TRUE;
     }
 
     static <T extends Comparable<T>> LessThan<T> lessThan(T expected) {
@@ -37,12 +45,14 @@ public sealed interface Expression<T> {
         return new GreaterThan<>(expected);
     }
 
+    @SuppressWarnings("unchecked")
     static <T extends Option<?>> IsSome<T> isSome() {
-        return new IsSome<>();
+        return (IsSome<T>) IS_SOME;
     }
 
+    @SuppressWarnings("unchecked")
     static <T extends Option<?>> IsNone<T> isNone() {
-        return new IsNone<>();
+        return (IsNone<T>) IS_NONE;
     }
 
     static <T> Expression<T> where(Predicate<? super T> predicate, String description) {
