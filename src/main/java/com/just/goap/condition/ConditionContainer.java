@@ -2,7 +2,9 @@ package com.just.goap.condition;
 
 import com.just.goap.state.WorldState;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +44,12 @@ public class ConditionContainer {
             .toList();
 
         return new ConditionContainer(remaining);
+    }
+
+    public ConditionContainer union(ConditionContainer other) {
+        var combined = new LinkedHashSet<>(conditions);
+        combined.addAll(other.conditions);
+        return new ConditionContainer(new ArrayList<>(combined));
     }
 
 }
