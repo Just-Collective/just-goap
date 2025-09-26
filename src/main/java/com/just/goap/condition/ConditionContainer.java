@@ -4,6 +4,7 @@ import com.just.goap.state.WorldState;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConditionContainer {
 
@@ -23,6 +24,14 @@ public class ConditionContainer {
 
     public boolean satisfiedBy(WorldState worldState) {
         return conditions.stream().allMatch(condition -> condition.satisfiedBy(worldState));
+    }
+
+    public ConditionContainer filterUnsatisfied(WorldState worldState) {
+        var unsatisfied = conditions.stream()
+            .filter(condition -> !condition.satisfiedBy(worldState))
+            .collect(Collectors.toList());
+
+        return new ConditionContainer(unsatisfied);
     }
 
 }
