@@ -2,8 +2,8 @@ package com.just.goap;
 
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.graph.Graph;
-import com.just.goap.state.MutableWorldState;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
+import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +20,13 @@ public final class AOStar {
     public static <T> @Nullable List<Action<T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
-        WorldState startState,
+        SensingMutableWorldState<T> startState,
         T context
     ) {
         var open = new PriorityQueue<AOStarNode<T>>(Comparator.comparingDouble(node -> node.fCost));
 
         var rootUnsatisfied = desiredConditions.filterUnsatisfied(startState);
-        var rootState = new MutableWorldState(startState);
+        var rootState = startState.copy();
 
         LOGGER.trace("Start state: {}", startState);
         LOGGER.trace("Root unsatisfied conditions: {}", rootUnsatisfied.getConditions());
@@ -72,7 +72,7 @@ public final class AOStar {
             for (var action : satisfyingActions) {
                 LOGGER.trace(" Trying action: {}", action);
                 // Simulate applying the action
-                var newState = new MutableWorldState(node.simulatedState);
+                var newState = node.simulatedState.copy();
                 newState.apply(action.getEffectContainer());
                 LOGGER.trace("  Applied effects, new state: {}", newState);
 
@@ -115,7 +115,12 @@ public final class AOStar {
         return null;
     }
 
-    private static <T> float heuristic(ConditionContainer unsatisfied, Graph<T> graph, T context, WorldState state) {
+    private static <T> float heuristic(
+        ConditionContainer unsatisfied,
+        Graph<T> graph,
+        T context,
+        ReadableWorldState state
+    ) {
         var h = 0.0f;
 
         for (var condition : unsatisfied.getConditions()) {
@@ -141,7 +146,7 @@ public final class AOStar {
     record AOStarNode<T>(
         ConditionContainer unsatisfiedConditions,
         List<Action<T>> planSoFar,
-        MutableWorldState simulatedState,
+        SensingMutableWorldState<T> simulatedState,
         // cost so far
         float gCost,
         // heuristic estimate
@@ -153,7 +158,7 @@ public final class AOStar {
         AOStarNode(
             ConditionContainer unsatisfiedConditions,
             List<Action<T>> planSoFar,
-            MutableWorldState simulatedState,
+            SensingMutableWorldState<T> simulatedState,
             float gCost,
             float hCost
         ) {

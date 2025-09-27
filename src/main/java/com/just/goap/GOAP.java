@@ -3,43 +3,34 @@ package com.just.goap;
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.Plan;
 import com.just.goap.plan.PlanFactory;
-import com.just.goap.state.MutableWorldState;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public final class GOAP<T> {
 
-    public static <T> Builder<T> builder(Graph<T> graph) {
-        return new Builder<>(graph);
+    public static <T> Builder<T> builder() {
+        return new Builder<>();
     }
 
     private final Graph<T> graph;
 
-    private final List<Sensor<? super T>> sensors;
+    private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
 
     private @Nullable Plan<T> currentPlan;
 
     private boolean isEnabled;
 
-    private GOAP(Graph<T> graph, List<Sensor<? super T>> sensors) {
+    private GOAP(Graph<T> graph, Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap) {
         this.graph = graph;
-        this.sensors = sensors;
+        this.sensorsByIdentifierMap = sensorsByIdentifierMap;
         this.currentPlan = null;
         this.isEnabled = true;
-    }
-
-    public WorldState sense(T context) {
-        var state = new MutableWorldState();
-
-        for (var sensor : sensors) {
-            sensor.sense(context, state);
-        }
-
-        return state;
     }
 
     public void update(T context) {
@@ -47,8 +38,7 @@ public final class GOAP<T> {
             return;
         }
 
-        // Sense all world input that we need to.
-        var worldState = sense(context);
+        var worldState = new SensingMutableWorldState<>(context, sensorsByIdentifierMap);
 
         if (currentPlan == null) {
             this.currentPlan = PlanFactory.create(graph, context, worldState);
@@ -76,22 +66,44 @@ public final class GOAP<T> {
 
     public static class Builder<T> {
 
-        private final Graph<T> graph;
+        private final Graph.Builder<T> graphBuilder;
 
-        private final List<Sensor<? super T>> sensors;
+        private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
 
-        private Builder(Graph<T> graph) {
-            this.graph = graph;
-            this.sensors = new ArrayList<>();
+        private Builder() {
+            this.graphBuilder = Graph.builder();
+            this.sensorsByIdentifierMap = new HashMap<>();
         }
 
-        public Builder<T> addSensor(Sensor<? super T> sensor) {
-            sensors.add(sensor);
+        public <U> Builder<T> addSensor(TypedIdentifier<U> identifier, Function<T, U> extractor) {
+            return addSensor(Sensor.direct(identifier, extractor));
+        }
+
+        public <U, V> Builder<T> addSensor(
+            TypedIdentifier<U> identifier,
+            TypedIdentifier<V> sourceIdentifier,
+            BiFunction<T, V, U> extractor
+        ) {
+            return addSensor(Sensor.derived(identifier, sourceIdentifier, extractor));
+        }
+
+        public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
+            sensorsByIdentifierMap.put(sensor.identifier(), sensor);
+            return this;
+        }
+
+        public Builder<T> addGoal(Goal goal) {
+            graphBuilder.addGoal(goal);
+            return this;
+        }
+
+        public Builder<T> addAction(Action<T> action) {
+            graphBuilder.addAction(action);
             return this;
         }
 
         public GOAP<T> build() {
-            return new GOAP<>(graph, Collections.unmodifiableList(sensors));
+            return new GOAP<>(graphBuilder.build(), Collections.unmodifiableMap(sensorsByIdentifierMap));
         }
     }
 }

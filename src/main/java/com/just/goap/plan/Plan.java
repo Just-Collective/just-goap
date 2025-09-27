@@ -5,7 +5,7 @@ import com.just.core.functional.option.Option;
 import com.just.goap.Action;
 import com.just.goap.Goal;
 import com.just.goap.state.Blackboard;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class Plan<T> {
         this.currentActionIndex = 0;
     }
 
-    public State update(T context, WorldState currentState) {
+    public State update(T context, ReadableWorldState currentState) {
         if (currentActionIndex >= actions.size()) {
             return State.Finished.INSTANCE;
         }

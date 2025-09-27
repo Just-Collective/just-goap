@@ -1,9 +1,32 @@
 package com.just.goap;
 
-import com.just.goap.state.MutableWorldState;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-@FunctionalInterface
-public interface Sensor<T> {
+public sealed interface Sensor<T, U> {
 
-    void sense(T context, MutableWorldState worldState);
+    static <T, U> Direct<T, U> direct(TypedIdentifier<U> identifier, Function<T, U> extractor) {
+        return new Direct<>(identifier, extractor);
+    }
+
+    static <T, U, V> Derived<T, U, V> derived(
+        TypedIdentifier<U> identifier,
+        TypedIdentifier<V> sourceIdentifier,
+        BiFunction<T, V, U> extractor
+    ) {
+        return new Derived<>(identifier, sourceIdentifier, extractor);
+    }
+
+    TypedIdentifier<U> identifier();
+
+    record Direct<T, U>(
+        TypedIdentifier<U> identifier,
+        Function<T, U> extractor
+    ) implements Sensor<T, U> {}
+
+    record Derived<T, U, V>(
+        TypedIdentifier<U> identifier,
+        TypedIdentifier<V> sourceIdentifier,
+        BiFunction<T, V, U> extractor
+    ) implements Sensor<T, U> {}
 }

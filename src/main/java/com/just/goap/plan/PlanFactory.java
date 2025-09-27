@@ -2,12 +2,12 @@ package com.just.goap.plan;
 
 import com.just.goap.AOStar;
 import com.just.goap.graph.Graph;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
 public class PlanFactory {
 
-    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, WorldState currentState) {
+    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, SensingMutableWorldState<T> currentState) {
         Plan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 

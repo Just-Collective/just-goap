@@ -6,7 +6,7 @@ import com.just.goap.condition.expression.Expression;
 import com.just.goap.effect.Effect;
 import com.just.goap.effect.EffectContainer;
 import com.just.goap.state.Blackboard;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,15 +47,15 @@ public class Action<T> {
         this.finishCallback = finishCallback;
     }
 
-    public float getCost(T context, WorldState worldState) {
+    public float getCost(T context, ReadableWorldState worldState) {
         return costCallback.apply(context, worldState);
     }
 
-    public boolean perform(T context, WorldState worldState, Blackboard blackboard) {
+    public boolean perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
         return performPredicate.accept(context, worldState, blackboard);
     }
 
-    public void onFinish(T context, WorldState worldState, Blackboard blackboard) {
+    public void onFinish(T context, ReadableWorldState worldState, Blackboard blackboard) {
         finishCallback.apply(context, worldState, blackboard);
     }
 
@@ -160,18 +160,18 @@ public class Action<T> {
     @FunctionalInterface
     public interface CostCallback<T> {
 
-        float apply(T context, WorldState worldState);
+        float apply(T context, ReadableWorldState worldState);
     }
 
     @FunctionalInterface
     public interface PerformPredicate<T> {
 
-        boolean accept(T context, WorldState worldState, Blackboard blackboard);
+        boolean accept(T context, ReadableWorldState worldState, Blackboard blackboard);
     }
 
     @FunctionalInterface
     public interface FinishCallback<T> {
 
-        void apply(T context, WorldState worldState, Blackboard blackboard);
+        void apply(T context, ReadableWorldState worldState, Blackboard blackboard);
     }
 }

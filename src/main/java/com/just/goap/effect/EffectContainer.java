@@ -1,7 +1,7 @@
 package com.just.goap.effect;
 
 import com.just.goap.state.MutableWorldState;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public final class EffectContainer {
         return effects;
     }
 
-    public WorldState toWorldState() {
+    public ReadableWorldState toWorldState() {
         var worldState = new MutableWorldState();
         worldState.apply(this);
         return worldState;

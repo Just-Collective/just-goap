@@ -3,7 +3,7 @@ package com.just.goap.condition;
 import com.just.goap.TypedIdentifier;
 import com.just.goap.condition.expression.Expression;
 import com.just.goap.effect.EffectContainer;
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
 
 public record Condition<T>(
     TypedIdentifier<? super T> identifier,
@@ -15,7 +15,7 @@ public record Condition<T>(
     }
 
     @SuppressWarnings("unchecked")
-    public boolean satisfiedBy(WorldState worldState) {
+    public boolean satisfiedBy(ReadableWorldState worldState) {
         var value = (T) worldState.getOrNull(identifier);
         return value != null && expression.evaluate(value);
     }

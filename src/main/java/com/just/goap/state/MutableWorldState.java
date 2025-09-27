@@ -4,35 +4,48 @@ import com.just.goap.TypedIdentifier;
 import com.just.goap.effect.EffectContainer;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.Map;
 
-public class MutableWorldState extends WorldState {
+public final class MutableWorldState implements ReadableWorldState, WritableWorldState {
+
+    private final Map<TypedIdentifier<?>, Object> stateMap;
 
     public MutableWorldState() {
         this(new HashMap<>());
     }
 
-    public MutableWorldState(WorldState worldState) {
-        this(new HashMap<>(worldState.stateMap));
+    public MutableWorldState(ReadableWorldState worldState) {
+        this(new HashMap<>(worldState.getMap()));
     }
 
     public MutableWorldState(HashMap<TypedIdentifier<?>, Object> stateMap) {
-        super(stateMap);
+        this.stateMap = stateMap;
     }
 
+    @Override
+    public Map<TypedIdentifier<?>, ?> getMap() {
+        return stateMap;
+    }
+
+    @Override
     public <T> void set(TypedIdentifier<T> key, T value) {
         stateMap.put(key, value);
     }
 
-    public <T> void set(TypedIdentifier<T> key, UnaryOperator<T> unaryOperator, Supplier<T> supplyIfAbsent) {
-        var previousValue = getOrNull(key);
-        var mutatedValue = unaryOperator.apply(previousValue == null ? supplyIfAbsent.get() : previousValue);
-
-        set(key, mutatedValue);
-    }
-
+    @Override
     public void apply(EffectContainer effectContainer) {
         effectContainer.getEffects().forEach(effect -> effect.apply(this));
+    }
+
+    @Override
+    public MutableWorldState copy() {
+        return new MutableWorldState(this);
+    }
+
+    @Override
+    public String toString() {
+        return "WorldState{" +
+            "stateMap=" + getMap() +
+            '}';
     }
 }

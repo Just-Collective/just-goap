@@ -1,6 +1,6 @@
 package com.just.goap.condition;
 
-import com.just.goap.state.WorldState;
+import com.just.goap.state.ReadableWorldState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -28,11 +28,11 @@ public class ConditionContainer {
         return conditions;
     }
 
-    public boolean satisfiedBy(WorldState worldState) {
+    public boolean satisfiedBy(ReadableWorldState worldState) {
         return conditions.stream().allMatch(condition -> condition.satisfiedBy(worldState));
     }
 
-    public ConditionContainer filterUnsatisfied(WorldState worldState) {
+    public ConditionContainer filterUnsatisfied(ReadableWorldState worldState) {
         var unsatisfied = conditions.stream()
             .filter(condition -> !condition.satisfiedBy(worldState))
             .collect(Collectors.toList());
