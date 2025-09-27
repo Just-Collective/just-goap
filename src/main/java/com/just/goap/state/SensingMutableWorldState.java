@@ -10,17 +10,17 @@ public final class SensingMutableWorldState<T> implements ReadableWorldState, Wr
 
     private final T context;
 
-    private final Map<GOAPKey<?>, Sensor<T, ?>> sensorMap;
+    private final Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap;
 
     private final MutableWorldState mutableWorldState;
 
-    public SensingMutableWorldState(T context, Map<GOAPKey<?>, Sensor<T, ?>> sensorMap) {
+    public SensingMutableWorldState(T context, Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap) {
         this(context, sensorMap, new MutableWorldState());
     }
 
     private SensingMutableWorldState(
         T context,
-        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap,
+        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap,
         MutableWorldState mutableWorldState
     ) {
         this.context = context;

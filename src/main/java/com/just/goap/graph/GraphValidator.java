@@ -16,7 +16,7 @@ class GraphValidator {
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
+        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         // Validate sensor coverage to make sure all typed keys are observable.
         validateSensorCoverageOrThrow(availableActions, availableGoals, sensorMap);
@@ -29,7 +29,7 @@ class GraphValidator {
     private static <T> void validateSensorCoverageOrThrow(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
-        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
+        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         var missing = new HashSet<GOAPKey<?>>();
 

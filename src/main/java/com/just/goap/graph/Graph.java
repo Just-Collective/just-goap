@@ -26,13 +26,13 @@ public class Graph<T> {
 
     private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-    private final Map<GOAPKey<?>, Sensor<T, ?>> sensorMap;
+    private final Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap;
 
     private Graph(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
+        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
@@ -52,7 +52,7 @@ public class Graph<T> {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
-    public Map<GOAPKey<?>, Sensor<T, ?>> getSensorMap() {
+    public Map<GOAPKey<?>, Sensor<? super T, ?>> getSensorMap() {
         return sensorMap;
     }
 
@@ -64,7 +64,7 @@ public class Graph<T> {
 
         private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-        private final Map<GOAPKey<?>, Sensor<T, ?>> sensorMap;
+        private final Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap;
 
         private Builder() {
             this.availableActions = new HashSet<>();
@@ -73,19 +73,19 @@ public class Graph<T> {
             this.sensorMap = new HashMap<>();
         }
 
-        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<T, U> extractor) {
+        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<? super T, ? extends U> extractor) {
             return addSensor(Sensor.direct(key, extractor));
         }
 
         public <U, V> Builder<T> addSensor(
             GOAPKey<U> key,
             GOAPKey<V> sourceKey,
-            BiFunction<T, V, U> extractor
+            BiFunction<? super T, ? super V, ? extends U> extractor
         ) {
             return addSensor(Sensor.derived(key, sourceKey, extractor));
         }
 
-        public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
+        public <U> Builder<T> addSensor(Sensor<? super T, ? extends U> sensor) {
             sensorMap.put(sensor.key(), sensor);
             return this;
         }
