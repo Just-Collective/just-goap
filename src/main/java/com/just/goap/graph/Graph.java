@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Graph<T> {
 
@@ -69,6 +71,18 @@ public class Graph<T> {
             this.availableGoals = new HashSet<>();
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
             this.sensorMap = new HashMap<>();
+        }
+
+        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<T, U> extractor) {
+            return addSensor(Sensor.direct(key, extractor));
+        }
+
+        public <U, V> Builder<T> addSensor(
+            GOAPKey<U> key,
+            GOAPKey<V> sourceKey,
+            BiFunction<T, V, U> extractor
+        ) {
+            return addSensor(Sensor.derived(key, sourceKey, extractor));
         }
 
         public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {

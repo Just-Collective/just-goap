@@ -6,13 +6,10 @@ import com.just.goap.plan.PlanFactory;
 import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 public final class GOAP<T> {
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
+    public static <T> GOAP<T> of(Graph<T> graph) {
+        return new GOAP<>(graph);
     }
 
     private final Graph<T> graph;
@@ -56,45 +53,5 @@ public final class GOAP<T> {
 
     public Graph<T> getGraph() {
         return graph;
-    }
-
-    public static class Builder<T> {
-
-        private final Graph.Builder<T> graphBuilder;
-
-        private Builder() {
-            this.graphBuilder = Graph.builder();
-        }
-
-        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<T, U> extractor) {
-            return addSensor(Sensor.direct(key, extractor));
-        }
-
-        public <U, V> Builder<T> addSensor(
-            GOAPKey<U> key,
-            GOAPKey<V> sourceKey,
-            BiFunction<T, V, U> extractor
-        ) {
-            return addSensor(Sensor.derived(key, sourceKey, extractor));
-        }
-
-        public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
-            graphBuilder.addSensor(sensor);
-            return this;
-        }
-
-        public Builder<T> addGoal(Goal goal) {
-            graphBuilder.addGoal(goal);
-            return this;
-        }
-
-        public Builder<T> addAction(Action<T> action) {
-            graphBuilder.addAction(action);
-            return this;
-        }
-
-        public GOAP<T> build() {
-            return new GOAP<>(graphBuilder.build());
-        }
     }
 }
