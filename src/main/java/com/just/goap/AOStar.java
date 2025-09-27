@@ -31,13 +31,15 @@ public final class AOStar {
         LOGGER.trace("Start state: {}", startState);
         LOGGER.trace("Root unsatisfied conditions: {}", rootUnsatisfied.getConditions());
 
-        open.add(new AOStarNode<>(
-            rootUnsatisfied,
-            new ArrayList<>(),
-            rootState,
-            0.0f,
-            heuristic(rootUnsatisfied, graph, context, startState)
-        ));
+        open.add(
+            new AOStarNode<>(
+                rootUnsatisfied,
+                new ArrayList<>(),
+                rootState,
+                0.0f,
+                heuristic(rootUnsatisfied, graph, context, startState)
+            )
+        );
 
         while (!open.isEmpty()) {
             var node = open.poll();
@@ -97,7 +99,13 @@ public final class AOStar {
                 // Costs
                 var g = node.gCost + action.getCost(context, node.simulatedState);
                 var h = heuristic(newUnsatisfied, graph, context, node.simulatedState);
-                LOGGER.trace("  Action cost={} → g={} h={} f={}", action.getCost(context, node.simulatedState), g, h, g + h);
+                LOGGER.trace(
+                    "  Action cost={} → g={} h={} f={}",
+                    action.getCost(context, node.simulatedState),
+                    g,
+                    h,
+                    g + h
+                );
 
                 open.add(new AOStarNode<>(newUnsatisfied, newPlan, newState, g, h));
             }

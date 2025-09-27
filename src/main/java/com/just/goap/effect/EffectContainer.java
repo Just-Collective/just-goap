@@ -3,18 +3,21 @@ package com.just.goap.effect;
 import com.just.goap.state.MutableWorldState;
 import com.just.goap.state.WorldState;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class EffectContainer {
+public final class EffectContainer {
 
     public static EffectContainer of(Effect<?>... effects) {
-        return new EffectContainer(Arrays.stream(effects).toList());
+        return of(List.of(effects));
     }
 
-    protected final List<Effect<?>> effects;
+    public static EffectContainer of(List<Effect<?>> effects) {
+        return new EffectContainer(effects);
+    }
 
-    protected EffectContainer(List<Effect<?>> effects) {
+    private final List<Effect<?>> effects;
+
+    private EffectContainer(List<Effect<?>> effects) {
         this.effects = effects;
     }
 
