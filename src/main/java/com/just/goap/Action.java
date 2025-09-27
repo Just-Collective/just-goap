@@ -141,6 +141,10 @@ public class Action<T> {
         }
 
         public Action<T> build() {
+            if (effects.isEmpty()) {
+                throw new IllegalStateException("Action must have at least one effect.");
+            }
+
             return new Action<>(
                 name,
                 ConditionContainer.of(preconditions),
