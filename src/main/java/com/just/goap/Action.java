@@ -9,6 +9,7 @@ import com.just.goap.state.Blackboard;
 import com.just.goap.state.WorldState;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -147,8 +148,8 @@ public class Action<T> {
 
             return new Action<>(
                 name,
-                ConditionContainer.of(preconditions),
-                EffectContainer.of(effects),
+                ConditionContainer.of(Collections.unmodifiableList(preconditions)),
+                EffectContainer.of(Collections.unmodifiableList(effects)),
                 costCallback,
                 performPredicate,
                 finishCallback
