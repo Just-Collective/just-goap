@@ -10,16 +10,16 @@ import java.util.List;
 
 public final class Goal {
 
-    public static <T> Goal of(TypedIdentifier<? super T> identifier, Expression<? super T> expression) {
-        return of(new Condition<T>(identifier, expression));
+    public static <T> Goal of(String name, TypedIdentifier<? super T> identifier, Expression<? super T> expression) {
+        return of(name, new Condition<T>(identifier, expression));
     }
 
-    public static Goal of(Condition<?> condition) {
-        return builder(condition).build();
+    public static Goal of(String name, Condition<?> condition) {
+        return builder(name, condition).build();
     }
 
-    public static Builder builder(Condition<?> condition) {
-        return new Builder(condition);
+    public static Builder builder(String name, Condition<?> condition) {
+        return new Builder(name, condition);
     }
 
     private final ConditionContainer desiredConditions;
@@ -50,9 +50,9 @@ public final class Goal {
 
         private String name;
 
-        private Builder(Condition<?> condition) {
+        private Builder(String name, Condition<?> condition) {
             this.desiredConditions = new ArrayList<>();
-            this.name = this.getClass().getSimpleName();
+            this.name = name;
 
             desiredConditions.add(condition);
         }
