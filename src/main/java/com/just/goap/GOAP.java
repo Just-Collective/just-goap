@@ -66,16 +66,16 @@ public final class GOAP<T> {
             this.graphBuilder = Graph.builder();
         }
 
-        public <U> Builder<T> addSensor(TypedIdentifier<U> identifier, Function<T, U> extractor) {
-            return addSensor(Sensor.direct(identifier, extractor));
+        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<T, U> extractor) {
+            return addSensor(Sensor.direct(key, extractor));
         }
 
         public <U, V> Builder<T> addSensor(
-            TypedIdentifier<U> identifier,
-            TypedIdentifier<V> sourceIdentifier,
+            GOAPKey<U> key,
+            GOAPKey<V> sourceKey,
             BiFunction<T, V, U> extractor
         ) {
-            return addSensor(Sensor.derived(identifier, sourceIdentifier, extractor));
+            return addSensor(Sensor.derived(key, sourceKey, extractor));
         }
 
         public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {

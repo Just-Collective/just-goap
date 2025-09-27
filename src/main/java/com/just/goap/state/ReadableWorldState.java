@@ -1,6 +1,6 @@
 package com.just.goap.state;
 
-import com.just.goap.TypedIdentifier;
+import com.just.goap.GOAPKey;
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.effect.EffectContainer;
 import org.jetbrains.annotations.Nullable;
@@ -9,10 +9,10 @@ import java.util.Map;
 
 public interface ReadableWorldState {
 
-    Map<TypedIdentifier<?>, ?> getMap();
+    Map<GOAPKey<?>, ?> getMap();
 
     @SuppressWarnings("unchecked")
-    default <T> @Nullable T getOrNull(TypedIdentifier<T> key) {
+    default <T> @Nullable T getOrNull(GOAPKey<T> key) {
         return (T) getMap().get(key);
     }
 

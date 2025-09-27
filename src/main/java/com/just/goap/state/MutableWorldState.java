@@ -1,6 +1,6 @@
 package com.just.goap.state;
 
-import com.just.goap.TypedIdentifier;
+import com.just.goap.GOAPKey;
 import com.just.goap.effect.EffectContainer;
 
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 public final class MutableWorldState implements ReadableWorldState, WritableWorldState {
 
-    private final Map<TypedIdentifier<?>, Object> stateMap;
+    private final Map<GOAPKey<?>, Object> stateMap;
 
     public MutableWorldState() {
         this(new HashMap<>());
@@ -18,17 +18,17 @@ public final class MutableWorldState implements ReadableWorldState, WritableWorl
         this(new HashMap<>(worldState.getMap()));
     }
 
-    public MutableWorldState(HashMap<TypedIdentifier<?>, Object> stateMap) {
+    public MutableWorldState(HashMap<GOAPKey<?>, Object> stateMap) {
         this.stateMap = stateMap;
     }
 
     @Override
-    public Map<TypedIdentifier<?>, ?> getMap() {
+    public Map<GOAPKey<?>, ?> getMap() {
         return stateMap;
     }
 
     @Override
-    public <T> void set(TypedIdentifier<T> key, T value) {
+    public <T> void set(GOAPKey<T> key, T value) {
         stateMap.put(key, value);
     }
 

@@ -1,9 +1,9 @@
 package com.just.goap.graph;
 
 import com.just.goap.Action;
+import com.just.goap.GOAPKey;
 import com.just.goap.Goal;
 import com.just.goap.Sensor;
-import com.just.goap.TypedIdentifier;
 import com.just.goap.condition.Condition;
 
 import java.util.HashSet;
@@ -16,10 +16,10 @@ class GraphValidator {
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap
+        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
     ) {
-        // Validate sensor coverage to make sure all typed identifiers are observable.
-        validateSensorCoverageOrThrow(availableActions, availableGoals, sensorsByIdentifierMap);
+        // Validate sensor coverage to make sure all typed keys are observable.
+        validateSensorCoverageOrThrow(availableActions, availableGoals, sensorMap);
         // Validate unreachable goal conditions.
         validateGoalReachabilityOrThrow(availableGoals, preconditionToSatisfyingActionsMap);
         // Validate dead-end actions.
@@ -29,17 +29,17 @@ class GraphValidator {
     private static <T> void validateSensorCoverageOrThrow(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
-        Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap
+        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
     ) {
-        var missing = new HashSet<TypedIdentifier<?>>();
+        var missing = new HashSet<GOAPKey<?>>();
 
         // Check goal desired conditions
         for (var goal : availableGoals) {
             for (var condition : goal.getDesiredConditions().getConditions()) {
-                var identifier = condition.identifier();
+                var key = condition.key();
 
-                if (!sensorsByIdentifierMap.containsKey(identifier)) {
-                    missing.add(identifier);
+                if (!sensorMap.containsKey(key)) {
+                    missing.add(key);
                 }
             }
         }
@@ -47,16 +47,16 @@ class GraphValidator {
         // Check action preconditions
         for (var action : availableActions) {
             for (var condition : action.getPreconditionContainer().getConditions()) {
-                var identifier = condition.identifier();
+                var key = condition.key();
 
-                if (!sensorsByIdentifierMap.containsKey(identifier)) {
-                    missing.add(identifier);
+                if (!sensorMap.containsKey(key)) {
+                    missing.add(key);
                 }
             }
         }
 
         if (!missing.isEmpty()) {
-            throw new IllegalStateException("Missing sensors for identifiers: " + missing);
+            throw new IllegalStateException("Missing sensors for keys: " + missing);
         }
     }
 

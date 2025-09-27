@@ -99,8 +99,8 @@ public class Action<T> {
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
-        public <U> Builder<T> addPrecondition(TypedIdentifier<? super U> identifier, Expression<? super U> expression) {
-            return addPrecondition(new Condition<>(identifier, expression));
+        public <U> Builder<T> addPrecondition(GOAPKey<? super U> key, Expression<? super U> expression) {
+            return addPrecondition(new Condition<>(key, expression));
         }
 
         public Builder<T> addPrecondition(Condition<?> condition) {
@@ -108,12 +108,12 @@ public class Action<T> {
             return this;
         }
 
-        public <U> Builder<T> addEffect(TypedIdentifier<U> identifier, UnaryOperator<U> consumer) {
-            return addEffect(new Effect.Dynamic<>(identifier, consumer));
+        public <U> Builder<T> addEffect(GOAPKey<U> key, UnaryOperator<U> consumer) {
+            return addEffect(new Effect.Dynamic<>(key, consumer));
         }
 
-        public <U> Builder<T> addEffect(TypedIdentifier<U> identifier, U value) {
-            return addEffect(new Effect.Value<>(identifier, value));
+        public <U> Builder<T> addEffect(GOAPKey<U> key, U value) {
+            return addEffect(new Effect.Value<>(key, value));
         }
 
         public Builder<T> addEffect(Effect<?> effect) {

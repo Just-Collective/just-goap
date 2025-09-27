@@ -5,28 +5,28 @@ import java.util.function.Function;
 
 public sealed interface Sensor<T, U> {
 
-    static <T, U> Direct<T, U> direct(TypedIdentifier<U> identifier, Function<T, U> extractor) {
-        return new Direct<>(identifier, extractor);
+    static <T, U> Direct<T, U> direct(GOAPKey<U> key, Function<T, U> extractor) {
+        return new Direct<>(key, extractor);
     }
 
     static <T, U, V> Derived<T, U, V> derived(
-        TypedIdentifier<U> identifier,
-        TypedIdentifier<V> sourceIdentifier,
+        GOAPKey<U> key,
+        GOAPKey<V> sourceKey,
         BiFunction<T, V, U> extractor
     ) {
-        return new Derived<>(identifier, sourceIdentifier, extractor);
+        return new Derived<>(key, sourceKey, extractor);
     }
 
-    TypedIdentifier<U> identifier();
+    GOAPKey<U> key();
 
     record Direct<T, U>(
-        TypedIdentifier<U> identifier,
+        GOAPKey<U> key,
         Function<T, U> extractor
     ) implements Sensor<T, U> {}
 
     record Derived<T, U, V>(
-        TypedIdentifier<U> identifier,
-        TypedIdentifier<V> sourceIdentifier,
+        GOAPKey<U> key,
+        GOAPKey<V> sourceKey,
         BiFunction<T, V, U> extractor
     ) implements Sensor<T, U> {}
 }

@@ -1,9 +1,9 @@
 package com.just.goap.graph;
 
 import com.just.goap.Action;
+import com.just.goap.GOAPKey;
 import com.just.goap.Goal;
 import com.just.goap.Sensor;
-import com.just.goap.TypedIdentifier;
 import com.just.goap.condition.Condition;
 
 import java.util.Collections;
@@ -24,18 +24,18 @@ public class Graph<T> {
 
     private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-    private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
+    private final Map<GOAPKey<?>, Sensor<T, ?>> sensorMap;
 
     private Graph(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap
+        Map<GOAPKey<?>, Sensor<T, ?>> sensorMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
         this.preconditionToSatisfyingActionsMap = preconditionToSatisfyingActionsMap;
-        this.sensorsByIdentifierMap = sensorsByIdentifierMap;
+        this.sensorMap = sensorMap;
     }
 
     public Set<Action<T>> getAvailableActions() {
@@ -50,8 +50,8 @@ public class Graph<T> {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
-    public Map<TypedIdentifier<?>, Sensor<T, ?>> getSensorMap() {
-        return sensorsByIdentifierMap;
+    public Map<GOAPKey<?>, Sensor<T, ?>> getSensorMap() {
+        return sensorMap;
     }
 
     public static class Builder<T> {
@@ -62,17 +62,17 @@ public class Graph<T> {
 
         private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-        private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
+        private final Map<GOAPKey<?>, Sensor<T, ?>> sensorMap;
 
         private Builder() {
             this.availableActions = new HashSet<>();
             this.availableGoals = new HashSet<>();
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
-            this.sensorsByIdentifierMap = new HashMap<>();
+            this.sensorMap = new HashMap<>();
         }
 
         public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
-            sensorsByIdentifierMap.put(sensor.identifier(), sensor);
+            sensorMap.put(sensor.key(), sensor);
             return this;
         }
 
@@ -150,14 +150,14 @@ public class Graph<T> {
                 availableActions,
                 availableGoals,
                 preconditionToSatisfyingActionsMap,
-                sensorsByIdentifierMap
+                sensorMap
             );
 
             return new Graph<>(
                 Collections.unmodifiableSet(availableActions),
                 Collections.unmodifiableSet(availableGoals),
                 Collections.unmodifiableMap(preconditionToSatisfyingActionsMap),
-                Collections.unmodifiableMap(sensorsByIdentifierMap)
+                Collections.unmodifiableMap(sensorMap)
             );
         }
 

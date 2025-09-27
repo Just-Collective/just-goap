@@ -10,8 +10,8 @@ import java.util.List;
 
 public final class Goal {
 
-    public static <T> Goal of(String name, TypedIdentifier<? super T> identifier, Expression<? super T> expression) {
-        return of(name, new Condition<T>(identifier, expression));
+    public static <T> Goal of(String name, GOAPKey<? super T> key, Expression<? super T> expression) {
+        return of(name, new Condition<T>(key, expression));
     }
 
     public static Goal of(String name, Condition<?> condition) {
