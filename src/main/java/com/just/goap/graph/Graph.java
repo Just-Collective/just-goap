@@ -2,6 +2,8 @@ package com.just.goap.graph;
 
 import com.just.goap.Action;
 import com.just.goap.Goal;
+import com.just.goap.Sensor;
+import com.just.goap.TypedIdentifier;
 import com.just.goap.condition.Condition;
 
 import java.util.Collections;
@@ -22,14 +24,18 @@ public class Graph<T> {
 
     private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
+    private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
+
     private Graph(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
-        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap
+        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
+        Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
         this.preconditionToSatisfyingActionsMap = preconditionToSatisfyingActionsMap;
+        this.sensorsByIdentifierMap = sensorsByIdentifierMap;
     }
 
     public Set<Action<T>> getAvailableActions() {
@@ -44,6 +50,10 @@ public class Graph<T> {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
+    public Map<TypedIdentifier<?>, Sensor<T, ?>> getSensorMap() {
+        return sensorsByIdentifierMap;
+    }
+
     public static class Builder<T> {
 
         private final Set<Action<T>> availableActions;
@@ -52,10 +62,18 @@ public class Graph<T> {
 
         private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
+        private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
+
         private Builder() {
             this.availableActions = new HashSet<>();
             this.availableGoals = new HashSet<>();
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
+            this.sensorsByIdentifierMap = new HashMap<>();
+        }
+
+        public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
+            sensorsByIdentifierMap.put(sensor.identifier(), sensor);
+            return this;
         }
 
         public Builder<T> addGoal(Goal goal) {
@@ -128,79 +146,19 @@ public class Graph<T> {
         }
 
         public Graph<T> build() {
-            validateReachabilityOrThrow();
+            GraphValidator.validate(
+                availableActions,
+                availableGoals,
+                preconditionToSatisfyingActionsMap,
+                sensorsByIdentifierMap
+            );
 
             return new Graph<>(
                 Collections.unmodifiableSet(availableActions),
                 Collections.unmodifiableSet(availableGoals),
-                Collections.unmodifiableMap(preconditionToSatisfyingActionsMap)
+                Collections.unmodifiableMap(preconditionToSatisfyingActionsMap),
+                Collections.unmodifiableMap(sensorsByIdentifierMap)
             );
-        }
-
-        private void validateReachabilityOrThrow() {
-            // Validate unreachable goal conditions.
-            validateGoalReachabilityOrThrow();
-            // Validate dead-end actions.
-            validateActionContributionOrThrow();
-        }
-
-        private void validateActionContributionOrThrow() {
-            var usefulConditions = new HashSet<Condition<?>>();
-            var reachableActions = new HashSet<Action<T>>();
-
-            // Start from goal desired conditions.
-            for (var goal : availableGoals) {
-                usefulConditions.addAll(goal.getDesiredConditions().getConditions());
-            }
-
-            // Propagate backwards to find all useful conditions/actions.
-            boolean changed;
-            do {
-                changed = false;
-
-                for (var action : availableActions) {
-                    if (reachableActions.contains(action)) {
-                        continue;
-                    }
-
-                    // If action effects satisfy any useful condition
-                    var useful = usefulConditions.stream()
-                        .anyMatch(condition -> condition.satisfiedBy(action.getEffectContainer()));
-
-                    if (useful) {
-                        reachableActions.add(action);
-
-                        for (var pre : action.getPreconditionContainer().getConditions()) {
-                            if (usefulConditions.add(pre)) {
-                                changed = true;
-                            }
-                        }
-                        changed = true;
-                    }
-                }
-            } while (changed);
-
-            for (var action : availableActions) {
-                if (!reachableActions.contains(action)) {
-                    throw new IllegalStateException(
-                        "Dead-end action: " + action + " has no contribution to any goal or precondition."
-                    );
-                }
-            }
-        }
-
-        private void validateGoalReachabilityOrThrow() {
-            for (var goal : availableGoals) {
-                for (var desiredCondition : goal.getDesiredConditions().getConditions()) {
-                    var satisfyingActions = preconditionToSatisfyingActionsMap.getOrDefault(desiredCondition, Set.of());
-
-                    if (satisfyingActions.isEmpty()) {
-                        throw new IllegalStateException(
-                            "No action satisfies goal condition: " + desiredCondition + " in goal: " + goal
-                        );
-                    }
-                }
-            }
         }
 
     }

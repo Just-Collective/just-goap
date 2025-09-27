@@ -6,9 +6,6 @@ import com.just.goap.plan.PlanFactory;
 import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -20,15 +17,12 @@ public final class GOAP<T> {
 
     private final Graph<T> graph;
 
-    private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
-
     private @Nullable Plan<T> currentPlan;
 
     private boolean isEnabled;
 
-    private GOAP(Graph<T> graph, Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap) {
+    private GOAP(Graph<T> graph) {
         this.graph = graph;
-        this.sensorsByIdentifierMap = sensorsByIdentifierMap;
         this.currentPlan = null;
         this.isEnabled = true;
     }
@@ -38,7 +32,7 @@ public final class GOAP<T> {
             return;
         }
 
-        var worldState = new SensingMutableWorldState<>(context, sensorsByIdentifierMap);
+        var worldState = new SensingMutableWorldState<>(context, graph.getSensorMap());
 
         if (currentPlan == null) {
             this.currentPlan = PlanFactory.create(graph, context, worldState);
@@ -68,11 +62,8 @@ public final class GOAP<T> {
 
         private final Graph.Builder<T> graphBuilder;
 
-        private final Map<TypedIdentifier<?>, Sensor<T, ?>> sensorsByIdentifierMap;
-
         private Builder() {
             this.graphBuilder = Graph.builder();
-            this.sensorsByIdentifierMap = new HashMap<>();
         }
 
         public <U> Builder<T> addSensor(TypedIdentifier<U> identifier, Function<T, U> extractor) {
@@ -88,7 +79,7 @@ public final class GOAP<T> {
         }
 
         public <U> Builder<T> addSensor(Sensor<T, ? super U> sensor) {
-            sensorsByIdentifierMap.put(sensor.identifier(), sensor);
+            graphBuilder.addSensor(sensor);
             return this;
         }
 
@@ -103,7 +94,7 @@ public final class GOAP<T> {
         }
 
         public GOAP<T> build() {
-            return new GOAP<>(graphBuilder.build(), Collections.unmodifiableMap(sensorsByIdentifierMap));
+            return new GOAP<>(graphBuilder.build());
         }
     }
 }
