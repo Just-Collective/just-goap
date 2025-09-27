@@ -5,6 +5,7 @@ import com.just.goap.condition.ConditionContainer;
 import com.just.goap.condition.expression.Expression;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class Goal {
@@ -67,7 +68,7 @@ public final class Goal {
         }
 
         public Goal build() {
-            return new Goal(ConditionContainer.of(desiredConditions), name);
+            return new Goal(ConditionContainer.of(Collections.unmodifiableList(desiredConditions)), name);
         }
     }
 }
