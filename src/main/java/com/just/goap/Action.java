@@ -14,8 +14,8 @@ import java.util.function.UnaryOperator;
 
 public class Action<T> {
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
+    public static <T> Builder<T> builder(String name) {
+        return new Builder<>(name);
     }
 
     private final ConditionContainer preconditions;
@@ -89,10 +89,10 @@ public class Action<T> {
 
         private String name;
 
-        private Builder() {
+        private Builder(String name) {
             this.preconditions = new ArrayList<>();
             this.effects = new ArrayList<>();
-            this.name = this.getClass().getSimpleName();
+            this.name = name;
             this.costCallback = ($1, $2) -> 0;
             this.performPredicate = ($1, $2, $3) -> true;
             this.finishCallback = ($1, $2, $3) -> {};
