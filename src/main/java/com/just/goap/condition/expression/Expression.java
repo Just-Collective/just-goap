@@ -9,13 +9,13 @@ import java.util.function.Predicate;
 
 public sealed interface Expression<T> {
 
-    Equals<Boolean> FALSE = equalTo(false);
+    Equals<Boolean> FALSE = new Equals<>(false);
 
-    IsNone<?> IS_NONE = isNone();
+    IsNone<?> IS_NONE = new IsNone<>();
 
-    IsSome<?> IS_SOME = isSome();
+    IsSome<?> IS_SOME = new IsSome<>();
 
-    Equals<Boolean> TRUE = equalTo(true);
+    Equals<Boolean> TRUE = new Equals<>(true);
 
     static <T> Contains<T> contains(T expected) {
         return new Contains<>(expected);
