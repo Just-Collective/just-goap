@@ -7,21 +7,30 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlanFactory {
 
-    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, SensingMutableWorldState<T> currentState) {
+    public static <T> @Nullable Plan<T> create(
+        Graph<T> graph,
+        T context,
+        SensingMutableWorldState<T> initialWorldState
+    ) {
         Plan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
         for (var goal : graph.getAvailableGoals()) {
+            if (!goal.getPreconditions().satisfiedBy(initialWorldState)) {
+                // Goal's preconditions are not satisfied by the current world state, skip the goal.
+                continue;
+            }
+
             // We need to find actions that satisfy these conditions.
             var desiredConditions = goal.getDesiredConditions();
 
-            var plan = AOStar.solve(graph, desiredConditions, currentState, context);
+            var plan = AOStar.solve(graph, desiredConditions, initialWorldState, context);
 
             if (plan != null && !plan.isEmpty()) {
                 // FIXME: The cost-per-action here is evaluated using the wrong world state. We need to use the
                 // simulated state.
                 var cost = plan.stream()
-                    .map(action -> action.getCost(context, currentState))
+                    .map(action -> action.getCost(context, initialWorldState))
                     .reduce(0.0f, Float::sum);
 
                 if (cost < bestCost) {
