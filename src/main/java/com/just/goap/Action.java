@@ -99,7 +99,7 @@ public class Action<T> {
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
-        public <U> Builder<T> addPrecondition(GOAPKey<? super U> key, Expression<? super U> expression) {
+        public <U> Builder<T> addPrecondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
             return addPrecondition(new Condition<>(key, expression));
         }
 

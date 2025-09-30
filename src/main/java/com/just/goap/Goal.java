@@ -61,7 +61,7 @@ public final class Goal {
             this.preconditions = new ArrayList<>();
         }
 
-        public <U> Builder addDesiredCondition(GOAPKey<? super U> key, Expression<? super U> expression) {
+        public <U> Builder addDesiredCondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
             return addDesiredCondition(new Condition<>(key, expression));
         }
 
@@ -70,7 +70,7 @@ public final class Goal {
             return this;
         }
 
-        public <U> Builder addPrecondition(GOAPKey<? super U> key, Expression<? super U> expression) {
+        public <U> Builder addPrecondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
             return addPrecondition(new Condition<>(key, expression));
         }
 
