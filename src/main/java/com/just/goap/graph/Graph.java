@@ -96,6 +96,11 @@ public class Graph<T> {
             return this;
         }
 
+        public Builder<T> addGoals(Collection<Goal> goals) {
+            goals.forEach(this::addGoal);
+            return this;
+        }
+
         public Builder<T> addGoal(Goal goal) {
             var desiredConditions = goal.getDesiredConditions().getConditions();
 
