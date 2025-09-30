@@ -1,5 +1,6 @@
 package com.just.goap.state;
 
+import com.just.core.functional.option.Option;
 import com.just.goap.GOAPKey;
 
 import java.util.HashMap;
@@ -25,6 +26,10 @@ public class Blackboard {
 
     public <T> T getOrThrow(GOAPKey<T> key) {
         return Objects.requireNonNull(getOrNull(key));
+    }
+
+    public <T> Option<T> get(GOAPKey<T> key) {
+        return Option.ofNullable(getOrNull(key));
     }
 
     public <T> void set(GOAPKey<T> key, T value) {
