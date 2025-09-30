@@ -6,6 +6,7 @@ import com.just.goap.Goal;
 import com.just.goap.Sensor;
 import com.just.goap.condition.Condition;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +72,11 @@ public class Graph<T> {
             this.availableGoals = new HashSet<>();
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
             this.sensorMap = new HashMap<>();
+        }
+
+        public Builder<T> addSensors(Collection<Sensor<T, ?>> sensors) {
+            sensors.forEach(this::addSensor);
+            return this;
         }
 
         public <U> Builder<T> addSensor(GOAPKey<U> key, Function<? super T, ? extends U> extractor) {
