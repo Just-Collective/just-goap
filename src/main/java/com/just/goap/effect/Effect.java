@@ -1,7 +1,7 @@
 package com.just.goap.effect;
 
 import com.just.goap.GOAPKey;
-import com.just.goap.state.MutableWorldState;
+import com.just.goap.state.WorldState;
 
 import java.util.function.UnaryOperator;
 
@@ -9,7 +9,7 @@ public sealed interface Effect<T> {
 
     GOAPKey<T> key();
 
-    void apply(MutableWorldState worldState);
+    void apply(WorldState worldState);
 
     record Value<T>(
         GOAPKey<T> key,
@@ -17,7 +17,7 @@ public sealed interface Effect<T> {
     ) implements Effect<T> {
 
         @Override
-        public void apply(MutableWorldState worldState) {
+        public void apply(WorldState worldState) {
             worldState.set(key, value);
         }
     }
@@ -28,7 +28,7 @@ public sealed interface Effect<T> {
     ) implements Effect<T> {
 
         @Override
-        public void apply(MutableWorldState worldState) {
+        public void apply(WorldState worldState) {
             var existingValue = worldState.getOrNull(key);
 
             if (existingValue != null) {

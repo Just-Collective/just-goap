@@ -1,7 +1,8 @@
 package com.just.goap.effect;
 
-import com.just.goap.state.MutableWorldState;
+import com.just.core.functional.function.Lazy;
 import com.just.goap.state.ReadableWorldState;
+import com.just.goap.state.WorldState;
 
 import java.util.List;
 
@@ -17,8 +18,15 @@ public final class EffectContainer {
 
     private final List<Effect<?>> effects;
 
+    private final Lazy<WorldState> worldStateLazy;
+
     private EffectContainer(List<Effect<?>> effects) {
         this.effects = effects;
+        this.worldStateLazy = Lazy.of(() -> {
+            var worldState = WorldState.create();
+            worldState.apply(this);
+            return worldState;
+        });
     }
 
     public List<Effect<?>> getEffects() {
@@ -26,8 +34,6 @@ public final class EffectContainer {
     }
 
     public ReadableWorldState toWorldState() {
-        var worldState = new MutableWorldState();
-        worldState.apply(this);
-        return worldState;
+        return worldStateLazy.get();
     }
 }

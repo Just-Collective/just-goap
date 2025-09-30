@@ -4,33 +4,35 @@ import com.just.goap.GOAPKey;
 import com.just.goap.Sensor;
 import com.just.goap.effect.EffectContainer;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public final class SensingMutableWorldState<T> implements ReadableWorldState, WritableWorldState {
+public final class SensingMutableWorldState<T> implements WorldState {
 
     private final T context;
 
     private final Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap;
 
-    private final MutableWorldState mutableWorldState;
+    private final Map<GOAPKey<?>, Object> stateMap;
 
     public SensingMutableWorldState(T context, Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap) {
-        this(context, sensorMap, new MutableWorldState());
+        this(context, sensorMap, new HashMap<>());
     }
 
     private SensingMutableWorldState(
         T context,
         Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap,
-        MutableWorldState mutableWorldState
+        Map<GOAPKey<?>, Object> stateMap
     ) {
         this.context = context;
         this.sensorMap = sensorMap;
-        this.mutableWorldState = mutableWorldState;
+        this.stateMap = stateMap;
     }
 
     @Override
     public <U> U getOrNull(GOAPKey<U> key) {
-        var value = mutableWorldState.getOrNull(key);
+        @SuppressWarnings("unchecked")
+        var value = (U) stateMap.get(key);
 
         if (value == null) {
             @SuppressWarnings("unchecked")
@@ -56,22 +58,22 @@ public final class SensingMutableWorldState<T> implements ReadableWorldState, Wr
 
     @Override
     public Map<GOAPKey<?>, ?> getMap() {
-        return mutableWorldState.getMap();
+        return stateMap;
     }
 
     @Override
     public <U> void set(GOAPKey<U> key, U value) {
-        mutableWorldState.set(key, value);
+        stateMap.put(key, value);
     }
 
     @Override
     public void apply(EffectContainer effectContainer) {
-        mutableWorldState.apply(effectContainer);
+        effectContainer.getEffects().forEach(effect -> effect.apply(this));
     }
 
     @Override
     public SensingMutableWorldState<T> copy() {
-        return new SensingMutableWorldState<>(context, sensorMap, mutableWorldState.copy());
+        return new SensingMutableWorldState<>(context, sensorMap, new HashMap<>(stateMap));
     }
 
     @Override
