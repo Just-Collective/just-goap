@@ -125,6 +125,11 @@ public class Graph<T> {
             return this;
         }
 
+        public Builder<T> addActions(Collection<Action<T>> actions) {
+            actions.forEach(this::addAction);
+            return this;
+        }
+
         public Builder<T> addAction(Action<T> action) {
             if (action.getEffectContainer().getEffects().isEmpty()) {
                 throw new IllegalArgumentException("Action must have at least one effect: " + action);
