@@ -1,5 +1,6 @@
 package com.just.goap.condition;
 
+import com.just.goap.Satisfiable;
 import com.just.goap.state.ReadableWorldState;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ConditionContainer {
+public class ConditionContainer implements Satisfiable {
 
     public static ConditionContainer of(Condition<?>... conditions) {
         return of(List.of(conditions));
@@ -24,10 +25,7 @@ public class ConditionContainer {
         this.conditions = conditions;
     }
 
-    public List<Condition<?>> getConditions() {
-        return conditions;
-    }
-
+    @Override
     public boolean satisfiedBy(ReadableWorldState worldState) {
         return conditions.stream().allMatch(condition -> condition.satisfiedBy(worldState));
     }
@@ -57,5 +55,9 @@ public class ConditionContainer {
 
     public boolean isEmpty() {
         return conditions.isEmpty();
+    }
+
+    public List<Condition<?>> getConditions() {
+        return conditions;
     }
 }
