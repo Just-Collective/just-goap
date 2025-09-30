@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Graph<T> {
@@ -172,6 +173,11 @@ public class Graph<T> {
                 }
             }
 
+            return this;
+        }
+
+        public Builder<T> apply(Consumer<Builder<T>> builderConsumer) {
+            builderConsumer.accept(this);
             return this;
         }
 
