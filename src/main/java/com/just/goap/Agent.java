@@ -6,29 +6,19 @@ import com.just.goap.plan.PlanFactory;
 import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
-public final class GOAP<T> {
+public final class Agent<T> {
 
-    public static <T> GOAP<T> of(Graph<T> graph) {
-        return new GOAP<>(graph);
+    public static <T> Agent<T> create() {
+        return new Agent<>();
     }
-
-    private final Graph<T> graph;
 
     private @Nullable Plan<T> currentPlan;
 
-    private boolean isEnabled;
-
-    private GOAP(Graph<T> graph) {
-        this.graph = graph;
+    private Agent() {
         this.currentPlan = null;
-        this.isEnabled = true;
     }
 
-    public void update(T context) {
-        if (!isEnabled) {
-            return;
-        }
-
+    public void update(Graph<T> graph, T context) {
         var worldState = new SensingMutableWorldState<>(context, graph.getSensorMap());
 
         if (currentPlan == null) {
@@ -45,13 +35,5 @@ public final class GOAP<T> {
                 case Plan.State.InProgress ignored -> {/* NO-OP */}
             }
         }
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.isEnabled = enabled;
-    }
-
-    public Graph<T> getGraph() {
-        return graph;
     }
 }
