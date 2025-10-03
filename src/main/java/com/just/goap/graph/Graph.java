@@ -80,13 +80,13 @@ public class Graph<T> {
             return this;
         }
 
-        public <U> Builder<T> addSensor(GOAPKey<U> key, Function<? super T, ? extends U> extractor) {
+        public <U> Builder<T> addSensor(GOAPKey.Sensed<U> key, Function<? super T, ? extends U> extractor) {
             return addSensor(Sensor.direct(key, extractor));
         }
 
         public <U, V> Builder<T> addSensor(
-            GOAPKey<U> key,
-            GOAPKey<V> sourceKey,
+            GOAPKey.Sensed<U> key,
+            GOAPKey.Sensed<V> sourceKey,
             BiFunction<? super T, ? super V, ? extends U> extractor
         ) {
             return addSensor(Sensor.derived(key, sourceKey, extractor));

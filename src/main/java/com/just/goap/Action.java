@@ -99,8 +99,12 @@ public class Action<T> {
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
-        public <U> Builder<T> addPrecondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
-            return addPrecondition(new Condition<>(key, expression));
+        public <U> Builder<T> addPrecondition(GOAPKey.Derived<? extends U> key, Expression<? super U> expression) {
+            return addPrecondition(Condition.derived(key, expression));
+        }
+
+        public <U> Builder<T> addPrecondition(GOAPKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            return addPrecondition(Condition.sensed(key, expression));
         }
 
         public Builder<T> addPrecondition(Condition<?> condition) {
@@ -108,11 +112,11 @@ public class Action<T> {
             return this;
         }
 
-        public <U> Builder<T> addEffect(GOAPKey<U> key, UnaryOperator<U> consumer) {
+        public <U> Builder<T> addEffect(GOAPKey.Derived<U> key, UnaryOperator<U> consumer) {
             return addEffect(new Effect.Dynamic<>(key, consumer));
         }
 
-        public <U> Builder<T> addEffect(GOAPKey<U> key, U value) {
+        public <U> Builder<T> addEffect(GOAPKey.Derived<U> key, U value) {
             return addEffect(new Effect.Value<>(key, value));
         }
 

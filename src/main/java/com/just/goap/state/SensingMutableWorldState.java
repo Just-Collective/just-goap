@@ -39,15 +39,15 @@ public final class SensingMutableWorldState<T> implements WorldState {
             var sensor = (Sensor<T, U>) sensorMap.get(key);
 
             switch (sensor) {
+                case Sensor.Direct<T, U> direct -> {
+                    value = direct.extractor().apply(context);
+                    set(key, value);
+                }
                 case Sensor.Derived<T, U, ?> derived -> {
                     @SuppressWarnings("unchecked")
                     var castedDerived = ((Sensor.Derived<T, U, Object>) derived);
                     var sourceValue = getOrNull(castedDerived.sourceKey());
                     value = castedDerived.extractor().apply(context, sourceValue);
-                    set(key, value);
-                }
-                case Sensor.Direct<T, U> direct -> {
-                    value = direct.extractor().apply(context);
                     set(key, value);
                 }
             }

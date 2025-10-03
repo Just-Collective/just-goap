@@ -49,9 +49,9 @@ public final class Goal {
 
     public static class Builder {
 
-        private final List<Condition<?>> desiredConditions;
+        private final List<Condition.Derived<?>> desiredConditions;
 
-        private final List<Condition<?>> preconditions;
+        private final List<Condition.Sensed<?>> preconditions;
 
         private String name;
 
@@ -61,20 +61,20 @@ public final class Goal {
             this.preconditions = new ArrayList<>();
         }
 
-        public <U> Builder addDesiredCondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
-            return addDesiredCondition(new Condition<>(key, expression));
+        public <U> Builder addDesiredCondition(GOAPKey.Derived<? extends U> key, Expression<? super U> expression) {
+            return addDesiredCondition(Condition.derived(key, expression));
         }
 
-        public Builder addDesiredCondition(Condition<?> condition) {
+        public <U> Builder addDesiredCondition(Condition.Derived<U> condition) {
             desiredConditions.add(condition);
             return this;
         }
 
-        public <U> Builder addPrecondition(GOAPKey<? extends U> key, Expression<? super U> expression) {
-            return addPrecondition(new Condition<>(key, expression));
+        public <U> Builder addPrecondition(GOAPKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            return addPrecondition(Condition.sensed(key, expression));
         }
 
-        public Builder addPrecondition(Condition<?> condition) {
+        public <U> Builder addPrecondition(Condition.Sensed<U> condition) {
             preconditions.add(condition);
             return this;
         }

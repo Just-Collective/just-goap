@@ -7,12 +7,12 @@ import java.util.function.UnaryOperator;
 
 public sealed interface Effect<T> {
 
-    GOAPKey<T> key();
+    GOAPKey.Derived<T> key();
 
     void apply(WorldState worldState);
 
     record Value<T>(
-        GOAPKey<T> key,
+        GOAPKey.Derived<T> key,
         T value
     ) implements Effect<T> {
 
@@ -23,7 +23,7 @@ public sealed interface Effect<T> {
     }
 
     record Dynamic<T>(
-        GOAPKey<T> key,
+        GOAPKey.Derived<T> key,
         UnaryOperator<T> consumer
     ) implements Effect<T> {
 

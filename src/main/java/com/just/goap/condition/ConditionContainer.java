@@ -19,9 +19,9 @@ public class ConditionContainer implements Satisfiable {
         return new ConditionContainer(conditions);
     }
 
-    protected final List<Condition<?>> conditions;
+    private final List<Condition<?>> conditions;
 
-    protected ConditionContainer(List<Condition<?>> conditions) {
+    private ConditionContainer(List<Condition<?>> conditions) {
         this.conditions = conditions;
     }
 
