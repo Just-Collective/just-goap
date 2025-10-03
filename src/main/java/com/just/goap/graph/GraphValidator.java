@@ -1,7 +1,7 @@
 package com.just.goap.graph;
 
 import com.just.goap.Action;
-import com.just.goap.GOAPKey;
+import com.just.goap.StateKey;
 import com.just.goap.Goal;
 import com.just.goap.Sensor;
 import com.just.goap.condition.Condition;
@@ -22,7 +22,7 @@ class GraphValidator {
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         var validationErrorCollector = new ValidationErrorCollector();
 
@@ -41,7 +41,7 @@ class GraphValidator {
     private static <T> void validateGoalPreconditionSatisfiabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
         Set<Goal> availableGoals,
-        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         for (var goal : availableGoals) {
             // Check goal preconditions. Preconditions always require a sensor.
@@ -66,10 +66,10 @@ class GraphValidator {
     private static <T> void validateKeySatisfiabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
         Set<Action<T>> availableActions,
-        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
     ) {
         // Map each key to its producing actions.
-        var derivedKeyProducerMap = new HashMap<GOAPKey.Derived<?>, Set<Action<T>>>();
+        var derivedKeyProducerMap = new HashMap<StateKey.Derived<?>, Set<Action<T>>>();
 
         for (var action : availableActions) {
             action.getEffectContainer().getEffects().forEach(effect -> {
@@ -84,7 +84,7 @@ class GraphValidator {
                 var key = precondition.key();
 
                 switch (key) {
-                    case GOAPKey.Derived<?> derivedKey -> {
+                    case StateKey.Derived<?> derivedKey -> {
                         var keyProducers = derivedKeyProducerMap.getOrDefault(derivedKey, Set.of());
 
                         // If this key is only produced by THIS action and no sensor exists, error.
@@ -111,7 +111,7 @@ class GraphValidator {
                             validationErrorCollector.error(errorMessage);
                         }
                     }
-                    case GOAPKey.Sensed<?> sensedKey -> {
+                    case StateKey.Sensed<?> sensedKey -> {
                         var noSensor = !sensorMap.containsKey(sensedKey);
 
                         if (noSensor) {

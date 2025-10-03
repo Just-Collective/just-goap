@@ -1,7 +1,7 @@
 package com.just.goap.state;
 
 import com.just.core.functional.option.Option;
-import com.just.goap.GOAPKey;
+import com.just.goap.StateKey;
 import com.just.goap.Satisfiable;
 import com.just.goap.Satisfier;
 import com.just.goap.condition.ConditionContainer;
@@ -13,9 +13,9 @@ import java.util.Objects;
 
 public interface ReadableWorldState extends Satisfiable, Satisfier {
 
-    <T> @Nullable T getOrNull(GOAPKey<T> key);
+    <T> @Nullable T getOrNull(StateKey<T> key);
 
-    Map<GOAPKey<?>, ?> getMap();
+    Map<StateKey<?>, ?> getMap();
 
     @Override
     default boolean satisfiedBy(ReadableWorldState worldState) {
@@ -41,23 +41,23 @@ public interface ReadableWorldState extends Satisfiable, Satisfier {
         return conditionContainer.satisfiedBy(this);
     }
 
-    default boolean has(GOAPKey<?> key) {
+    default boolean has(StateKey<?> key) {
         var value = getOrNull(key);
         return value != null;
     }
 
-    default <T> T getOrDefault(GOAPKey<T> key, T defaultValue) {
+    default <T> T getOrDefault(StateKey<T> key, T defaultValue) {
         var value = getOrNull(key);
         return value == null
             ? defaultValue
             : value;
     }
 
-    default <T> T getOrThrow(GOAPKey<T> key) {
+    default <T> T getOrThrow(StateKey<T> key) {
         return Objects.requireNonNull(getOrNull(key));
     }
 
-    default <T> Option<T> get(GOAPKey<T> key) {
+    default <T> Option<T> get(StateKey<T> key) {
         return Option.ofNullable(getOrNull(key));
     }
 }

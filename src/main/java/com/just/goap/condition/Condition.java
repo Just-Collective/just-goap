@@ -1,6 +1,6 @@
 package com.just.goap.condition;
 
-import com.just.goap.GOAPKey;
+import com.just.goap.StateKey;
 import com.just.goap.Satisfiable;
 import com.just.goap.condition.expression.Expression;
 import com.just.goap.effect.EffectContainer;
@@ -8,19 +8,19 @@ import com.just.goap.state.ReadableWorldState;
 
 public sealed abstract class Condition<T> implements Satisfiable {
 
-    public static <T> Condition.Derived<T> derived(GOAPKey.Derived<T> key, Expression<? super T> expression) {
+    public static <T> Condition.Derived<T> derived(StateKey.Derived<T> key, Expression<? super T> expression) {
         return new Condition.Derived<>(key, expression);
     }
 
-    public static <T> Condition.Sensed<T> sensed(GOAPKey.Sensed<T> key, Expression<? super T> expression) {
+    public static <T> Condition.Sensed<T> sensed(StateKey.Sensed<T> key, Expression<? super T> expression) {
         return new Condition.Sensed<>(key, expression);
     }
 
-    private final GOAPKey<T> key;
+    private final StateKey<T> key;
 
     private final Expression<? super T> expression;
 
-    protected Condition(GOAPKey<T> key, Expression<? super T> expression) {
+    protected Condition(StateKey<T> key, Expression<? super T> expression) {
         this.key = key;
         this.expression = expression;
     }
@@ -36,7 +36,7 @@ public sealed abstract class Condition<T> implements Satisfiable {
         return value != null && expression.evaluate(value);
     }
 
-    public GOAPKey<T> key() {
+    public StateKey<T> key() {
         return key;
     }
 
@@ -47,14 +47,14 @@ public sealed abstract class Condition<T> implements Satisfiable {
 
     public static final class Derived<T> extends Condition<T> {
 
-        private Derived(GOAPKey.Derived<T> key, Expression<? super T> expression) {
+        private Derived(StateKey.Derived<T> key, Expression<? super T> expression) {
             super(key, expression);
         }
     }
 
     public static final class Sensed<T> extends Condition<T> {
 
-        private Sensed(GOAPKey.Sensed<T> key, Expression<? super T> expression) {
+        private Sensed(StateKey.Sensed<T> key, Expression<? super T> expression) {
             super(key, expression);
         }
     }

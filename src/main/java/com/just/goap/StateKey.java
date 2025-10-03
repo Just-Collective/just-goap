@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public sealed abstract class GOAPKey<T> {
+public sealed abstract class StateKey<T> {
 
     public static <T> Derived<T> derived(String id) {
         return new Derived<>(id);
@@ -16,7 +16,7 @@ public sealed abstract class GOAPKey<T> {
 
     protected final String id;
 
-    protected GOAPKey(String id) {
+    protected StateKey(String id) {
         this.id = id;
     }
 
@@ -30,7 +30,7 @@ public sealed abstract class GOAPKey<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof GOAPKey<?> key)) {
+        if (!(o instanceof StateKey<?> key)) {
             return false;
         }
 
@@ -42,7 +42,7 @@ public sealed abstract class GOAPKey<T> {
         return Objects.hashCode(id);
     }
 
-    public static final class Derived<T> extends GOAPKey<T> {
+    public static final class Derived<T> extends StateKey<T> {
 
         private Derived(String id) {
             super(id);
@@ -64,7 +64,7 @@ public sealed abstract class GOAPKey<T> {
         }
     }
 
-    public static final class Sensed<T> extends GOAPKey<T> {
+    public static final class Sensed<T> extends StateKey<T> {
 
         private Sensed(String id) {
             super(id);

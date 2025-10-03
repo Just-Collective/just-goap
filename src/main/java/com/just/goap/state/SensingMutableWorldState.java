@@ -1,6 +1,6 @@
 package com.just.goap.state;
 
-import com.just.goap.GOAPKey;
+import com.just.goap.StateKey;
 import com.just.goap.Sensor;
 import com.just.goap.effect.EffectContainer;
 
@@ -11,18 +11,18 @@ public final class SensingMutableWorldState<T> implements WorldState {
 
     private final T context;
 
-    private final Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap;
+    private final Map<StateKey<?>, Sensor<? super T, ?>> sensorMap;
 
-    private final Map<GOAPKey<?>, Object> stateMap;
+    private final Map<StateKey<?>, Object> stateMap;
 
-    public SensingMutableWorldState(T context, Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap) {
+    public SensingMutableWorldState(T context, Map<StateKey<?>, Sensor<? super T, ?>> sensorMap) {
         this(context, sensorMap, new HashMap<>());
     }
 
     private SensingMutableWorldState(
         T context,
-        Map<GOAPKey<?>, Sensor<? super T, ?>> sensorMap,
-        Map<GOAPKey<?>, Object> stateMap
+        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap,
+        Map<StateKey<?>, Object> stateMap
     ) {
         this.context = context;
         this.sensorMap = sensorMap;
@@ -30,7 +30,7 @@ public final class SensingMutableWorldState<T> implements WorldState {
     }
 
     @Override
-    public <U> U getOrNull(GOAPKey<U> key) {
+    public <U> U getOrNull(StateKey<U> key) {
         @SuppressWarnings("unchecked")
         var value = (U) stateMap.get(key);
 
@@ -57,12 +57,12 @@ public final class SensingMutableWorldState<T> implements WorldState {
     }
 
     @Override
-    public Map<GOAPKey<?>, ?> getMap() {
+    public Map<StateKey<?>, ?> getMap() {
         return stateMap;
     }
 
     @Override
-    public <U> void set(GOAPKey<U> key, U value) {
+    public <U> void set(StateKey<U> key, U value) {
         stateMap.put(key, value);
     }
 

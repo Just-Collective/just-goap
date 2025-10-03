@@ -61,7 +61,7 @@ public final class Goal {
             this.preconditions = new ArrayList<>();
         }
 
-        public <U> Builder addDesiredCondition(GOAPKey.Derived<? extends U> key, Expression<? super U> expression) {
+        public <U> Builder addDesiredCondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
             return addDesiredCondition(Condition.derived(key, expression));
         }
 
@@ -70,7 +70,7 @@ public final class Goal {
             return this;
         }
 
-        public <U> Builder addPrecondition(GOAPKey.Sensed<? extends U> key, Expression<? super U> expression) {
+        public <U> Builder addPrecondition(StateKey.Sensed<? extends U> key, Expression<? super U> expression) {
             return addPrecondition(Condition.sensed(key, expression));
         }
 

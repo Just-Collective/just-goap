@@ -1,18 +1,18 @@
 package com.just.goap.effect;
 
-import com.just.goap.GOAPKey;
+import com.just.goap.StateKey;
 import com.just.goap.state.WorldState;
 
 import java.util.function.UnaryOperator;
 
 public sealed interface Effect<T> {
 
-    GOAPKey.Derived<T> key();
+    StateKey.Derived<T> key();
 
     void apply(WorldState worldState);
 
     record Value<T>(
-        GOAPKey.Derived<T> key,
+        StateKey.Derived<T> key,
         T value
     ) implements Effect<T> {
 
@@ -23,7 +23,7 @@ public sealed interface Effect<T> {
     }
 
     record Dynamic<T>(
-        GOAPKey.Derived<T> key,
+        StateKey.Derived<T> key,
         UnaryOperator<T> consumer
     ) implements Effect<T> {
 
