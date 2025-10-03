@@ -1,9 +1,9 @@
 package com.just.goap.state;
 
 import com.just.core.functional.option.Option;
-import com.just.goap.StateKey;
 import com.just.goap.Satisfiable;
 import com.just.goap.Satisfier;
+import com.just.goap.StateKey;
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.effect.EffectContainer;
 import org.jetbrains.annotations.Nullable;

@@ -1,7 +1,7 @@
 package com.just.goap.state;
 
-import com.just.goap.StateKey;
 import com.just.goap.Sensor;
+import com.just.goap.StateKey;
 import com.just.goap.effect.EffectContainer;
 
 import java.util.HashMap;

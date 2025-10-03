@@ -1,9 +1,9 @@
 package com.just.goap.graph;
 
 import com.just.goap.Action;
-import com.just.goap.StateKey;
 import com.just.goap.Goal;
 import com.just.goap.Sensor;
+import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

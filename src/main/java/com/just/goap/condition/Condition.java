@@ -1,7 +1,7 @@
 package com.just.goap.condition;
 
-import com.just.goap.StateKey;
 import com.just.goap.Satisfiable;
+import com.just.goap.StateKey;
 import com.just.goap.condition.expression.Expression;
 import com.just.goap.effect.EffectContainer;
 import com.just.goap.state.ReadableWorldState;
