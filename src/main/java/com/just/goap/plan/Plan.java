@@ -30,7 +30,7 @@ public class Plan<T> {
     }
 
     public State update(T context, ReadableWorldState currentState) {
-        if (currentActionIndex >= actions.size()) {
+        if (getPlanState() == State.FINISHED) {
             return State.FINISHED;
         }
 
@@ -70,7 +70,7 @@ public class Plan<T> {
 
     private void proceedToNextAction() {
         // Move to the next action index.
-        this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size() - 1);
+        this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size());
     }
 
     private State getPlanState() {
