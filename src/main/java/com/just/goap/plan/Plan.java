@@ -33,28 +33,33 @@ public class Plan<T> {
 
     public State update(T context, ReadableWorldState currentState) {
         if (currentActionIndex >= actions.size()) {
-            return State.Finished.INSTANCE;
+            return State.FINISHED;
         }
 
         var action = actions.get(currentActionIndex);
 
         if (!action.getPreconditionContainer().satisfiedBy(currentState)) {
             action.onFinish(context, currentState, blackboard);
-            return State.Invalid.INSTANCE;
+            return State.INVALID;
         }
 
-        // If the world state already satisfies the effects of the action,
-        // OR check if the action is finished after performing...
-        if (
-            currentState.satisfies(action.getEffectContainer()) || action.perform(context, currentState, blackboard)
-                .isTerminating()
-        ) {
+        // If the world state already satisfies the effects of the action...
+        if (currentState.satisfies(action.getEffectContainer())) {
             // Then the action can be considered complete, move on to the next action or finish.
             action.onFinish(context, currentState, blackboard);
             return proceedToNextActionOrFinish();
         }
 
-        return State.InProgress.INSTANCE;
+        var performResult = action.perform(context, currentState, blackboard);
+
+        return switch (performResult) {
+            case CONTINUE -> State.IN_PROGRESS;
+            case FAILED -> State.FAILED;
+            case FINISHED -> {
+                action.onFinish(context, currentState, blackboard);
+                yield proceedToNextActionOrFinish();
+            }
+        };
     }
 
     private @NotNull State proceedToNextActionOrFinish() {
@@ -62,8 +67,8 @@ public class Plan<T> {
         this.currentActionIndex += 1;
         // Evaluate based on current index if we've reached the end of the plan sequence or have more actions left.
         return currentActionIndex >= actions.size()
-            ? State.Finished.INSTANCE
-            : State.InProgress.INSTANCE;
+            ? State.FINISHED
+            : State.IN_PROGRESS;
     }
 
     public Option<Action<T>> getCurrentAction() {
@@ -82,22 +87,10 @@ public class Plan<T> {
             '}';
     }
 
-    public sealed interface State {
-
-        enum Finished implements State {
-            INSTANCE
-        }
-
-        enum Failed implements State {
-            INSTANCE
-        }
-
-        enum InProgress implements State {
-            INSTANCE
-        }
-
-        enum Invalid implements State {
-            INSTANCE
-        }
+    public enum State {
+        FAILED,
+        FINISHED,
+        IN_PROGRESS,
+        INVALID;
     }
 }

@@ -29,10 +29,8 @@ public final class Agent<T> {
             var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
-                case Plan.State.Failed ignored -> this.currentPlan = null;
-                case Plan.State.Finished ignored -> this.currentPlan = null;
-                case Plan.State.Invalid ignored -> this.currentPlan = null;
-                case Plan.State.InProgress ignored -> {/* NO-OP */}
+                case FAILED, FINISHED, INVALID -> this.currentPlan = null;
+                case IN_PROGRESS -> {/* NO-OP */}
             }
         }
     }
