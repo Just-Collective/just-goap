@@ -1,7 +1,6 @@
 package com.just.goap.plan;
 
 import com.just.core.functional.function.Lazy;
-import com.just.core.functional.option.Option;
 import com.just.goap.Action;
 import com.just.goap.Goal;
 import com.just.goap.state.Blackboard;
@@ -55,10 +54,6 @@ public class Plan<T> {
         return switch (performResult) {
             case CONTINUE -> State.IN_PROGRESS;
             case FAILED -> State.FAILED;
-            case FINISHED -> {
-                action.onFinish(context, currentState, blackboard);
-                yield proceedToNextActionOrFinish();
-            }
         };
     }
 
@@ -69,12 +64,6 @@ public class Plan<T> {
         return currentActionIndex >= actions.size()
             ? State.FINISHED
             : State.IN_PROGRESS;
-    }
-
-    public Option<Action<T>> getCurrentAction() {
-        return currentActionIndex >= actions.size()
-            ? Option.none()
-            : Option.some(actions.get(currentActionIndex));
     }
 
     @Override

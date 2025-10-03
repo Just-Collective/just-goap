@@ -95,7 +95,7 @@ public class Action<T> {
             this.effects = new ArrayList<>();
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
-            this.performCallback = ($1, $2, $3) -> Result.FINISHED;
+            this.performCallback = ($1, $2, $3) -> Result.CONTINUE;
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
@@ -162,20 +162,8 @@ public class Action<T> {
     }
 
     public enum Result {
-
-        CONTINUE(false),
-        FAILED(true),
-        FINISHED(true);
-
-        private final boolean isTerminating;
-
-        Result(boolean isTerminating) {
-            this.isTerminating = isTerminating;
-        }
-
-        public boolean isTerminating() {
-            return isTerminating;
-        }
+        CONTINUE,
+        FAILED
     }
 
     @FunctionalInterface
