@@ -25,7 +25,7 @@ public class Action<T> {
 
     private final CostCallback<T> costCallback;
 
-    private final PerformPredicate<T> performPredicate;
+    private final PerformCallback<T> performCallback;
 
     private final FinishCallback<T> finishCallback;
 
@@ -36,14 +36,14 @@ public class Action<T> {
         ConditionContainer conditionContainer,
         EffectContainer effectContainer,
         CostCallback<T> costCallback,
-        PerformPredicate<T> performPredicate,
+        PerformCallback<T> performCallback,
         FinishCallback<T> finishCallback
     ) {
         this.name = name;
         this.preconditions = conditionContainer;
         this.effects = effectContainer;
         this.costCallback = costCallback;
-        this.performPredicate = performPredicate;
+        this.performCallback = performCallback;
         this.finishCallback = finishCallback;
     }
 
@@ -51,8 +51,8 @@ public class Action<T> {
         return costCallback.apply(context, worldState);
     }
 
-    public boolean perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
-        return performPredicate.accept(context, worldState, blackboard);
+    public Result perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
+        return performCallback.accept(context, worldState, blackboard);
     }
 
     public void onFinish(T context, ReadableWorldState worldState, Blackboard blackboard) {
@@ -84,7 +84,7 @@ public class Action<T> {
 
         private CostCallback<T> costCallback;
 
-        private PerformPredicate<T> performPredicate;
+        private PerformCallback<T> performCallback;
 
         private FinishCallback<T> finishCallback;
 
@@ -95,7 +95,7 @@ public class Action<T> {
             this.effects = new ArrayList<>();
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
-            this.performPredicate = ($1, $2, $3) -> true;
+            this.performCallback = ($1, $2, $3) -> Result.FINISHED;
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
@@ -135,8 +135,8 @@ public class Action<T> {
             return this;
         }
 
-        public Builder<T> withPerformPredicate(PerformPredicate<T> performPredicate) {
-            this.performPredicate = performPredicate;
+        public Builder<T> withPerformCallback(PerformCallback<T> performCallback) {
+            this.performCallback = performCallback;
             return this;
         }
 
@@ -155,9 +155,26 @@ public class Action<T> {
                 ConditionContainer.of(Collections.unmodifiableList(preconditions)),
                 EffectContainer.of(Collections.unmodifiableList(effects)),
                 costCallback,
-                performPredicate,
+                performCallback,
                 finishCallback
             );
+        }
+    }
+
+    public enum Result {
+
+        CONTINUE(false),
+        FAILED(true),
+        FINISHED(true);
+
+        private final boolean isTerminating;
+
+        Result(boolean isTerminating) {
+            this.isTerminating = isTerminating;
+        }
+
+        public boolean isTerminating() {
+            return isTerminating;
         }
     }
 
@@ -168,9 +185,9 @@ public class Action<T> {
     }
 
     @FunctionalInterface
-    public interface PerformPredicate<T> {
+    public interface PerformCallback<T> {
 
-        boolean accept(T context, ReadableWorldState worldState, Blackboard blackboard);
+        Result accept(T context, ReadableWorldState worldState, Blackboard blackboard);
     }
 
     @FunctionalInterface
