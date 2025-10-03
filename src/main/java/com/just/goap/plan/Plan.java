@@ -5,7 +5,6 @@ import com.just.goap.Action;
 import com.just.goap.Goal;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,32 +34,46 @@ public class Plan<T> {
             return State.FINISHED;
         }
 
-        var action = actions.get(currentActionIndex);
+        var currentAction = actions.get(currentActionIndex);
 
-        if (!action.getPreconditionContainer().satisfiedBy(currentState)) {
-            action.onFinish(context, currentState, blackboard);
+        // If the world state already satisfies the effects of the action...
+        if (currentState.satisfies(currentAction.getEffectContainer())) {
+            // Then the action can be considered complete, move on to the next action or finish.
+            currentAction.onFinish(context, currentState, blackboard);
+            // Move current action index forward.
+            proceedToNextAction();
+
+            var planState = getPlanState();
+
+            if (planState == State.FINISHED) {
+                return planState;
+            }
+
+            // Re-assign the current action reference before we run the next action.
+            currentAction = actions.get(currentActionIndex);
+        }
+
+        // Always check the current action's preconditions before running the action.
+        if (!currentAction.getPreconditionContainer().satisfiedBy(currentState)) {
+            currentAction.onFinish(context, currentState, blackboard);
             return State.INVALID;
         }
 
-        // If the world state already satisfies the effects of the action...
-        if (currentState.satisfies(action.getEffectContainer())) {
-            // Then the action can be considered complete, move on to the next action or finish.
-            action.onFinish(context, currentState, blackboard);
-            return proceedToNextActionOrFinish();
-        }
+        // Run the action.
+        var result = currentAction.perform(context, currentState, blackboard);
 
-        var performResult = action.perform(context, currentState, blackboard);
-
-        return switch (performResult) {
+        return switch (result) {
             case CONTINUE -> State.IN_PROGRESS;
             case FAILED -> State.FAILED;
         };
     }
 
-    private @NotNull State proceedToNextActionOrFinish() {
+    private void proceedToNextAction() {
         // Move to the next action index.
-        this.currentActionIndex += 1;
-        // Evaluate based on current index if we've reached the end of the plan sequence or have more actions left.
+        this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size() - 1);
+    }
+
+    private State getPlanState() {
         return currentActionIndex >= actions.size()
             ? State.FINISHED
             : State.IN_PROGRESS;
@@ -80,6 +93,6 @@ public class Plan<T> {
         FAILED,
         FINISHED,
         IN_PROGRESS,
-        INVALID;
+        INVALID
     }
 }
