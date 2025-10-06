@@ -68,14 +68,14 @@ public class Plan<T> {
         }
 
         // Run the action.
-        var result = currentAction.perform(context, currentState, blackboard);
+        var signal = currentAction.perform(context, currentState, blackboard);
 
         // Increment the current action tick after performing the action.
         currentActionTick++;
 
-        return switch (result) {
+        return switch (signal) {
+            case ABORT -> State.ABORTED;
             case CONTINUE -> State.IN_PROGRESS;
-            case FAILED -> State.FAILED;
         };
     }
 
@@ -103,7 +103,7 @@ public class Plan<T> {
     }
 
     public enum State {
-        FAILED,
+        ABORTED,
         FINISHED,
         IN_PROGRESS,
         INVALID

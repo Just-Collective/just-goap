@@ -55,7 +55,7 @@ public class Action<T> {
         return costCallback.apply(context, worldState);
     }
 
-    public Result perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
+    public Signal perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
         return performCallback.accept(context, worldState, blackboard);
     }
 
@@ -106,7 +106,7 @@ public class Action<T> {
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
             this.startCallback = ($1, $2, $3) -> {};
-            this.performCallback = ($1, $2, $3) -> Result.CONTINUE;
+            this.performCallback = ($1, $2, $3) -> Signal.CONTINUE;
             this.finishCallback = ($1, $2, $3) -> {};
         }
 
@@ -178,9 +178,9 @@ public class Action<T> {
         }
     }
 
-    public enum Result {
-        CONTINUE,
-        FAILED
+    public enum Signal {
+        ABORT,
+        CONTINUE
     }
 
     @FunctionalInterface
@@ -198,7 +198,7 @@ public class Action<T> {
     @FunctionalInterface
     public interface PerformCallback<T> {
 
-        Result accept(T context, ReadableWorldState worldState, Blackboard blackboard);
+        Signal accept(T context, ReadableWorldState worldState, Blackboard blackboard);
     }
 
     @FunctionalInterface

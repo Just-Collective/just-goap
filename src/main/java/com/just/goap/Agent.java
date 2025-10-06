@@ -38,7 +38,7 @@ public final class Agent<T> {
             var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
-                case FAILED, FINISHED, INVALID -> currentPlan = null;
+                case ABORTED, FINISHED, INVALID -> currentPlan = null;
                 case IN_PROGRESS -> {/* NO-OP */}
             }
         }
