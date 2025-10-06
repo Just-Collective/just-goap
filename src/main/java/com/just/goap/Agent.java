@@ -21,11 +21,11 @@ public final class Agent<T> {
     public void update(Graph<T> graph, T context) {
         var worldState = new SensingMutableWorldState<>(context, graph.getSensorMap());
 
-        if (currentPlan == null) {
+        if (!hasPlan()) {
             this.currentPlan = PlanFactory.create(graph, context, worldState);
         }
 
-        if (currentPlan != null) {
+        if (hasPlan()) {
             var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
@@ -33,5 +33,9 @@ public final class Agent<T> {
                 case IN_PROGRESS -> {/* NO-OP */}
             }
         }
+    }
+
+    public boolean hasPlan() {
+        return currentPlan != null;
     }
 }
