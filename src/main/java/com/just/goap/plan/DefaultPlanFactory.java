@@ -5,7 +5,7 @@ import com.just.goap.graph.Graph;
 import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
-public class PlanFactory {
+public class DefaultPlanFactory {
 
     public static <T> @Nullable Plan<T> create(
         Graph<T> graph,
@@ -43,7 +43,7 @@ public class PlanFactory {
         return bestPlan;
     }
 
-    private PlanFactory() {
+    private DefaultPlanFactory() {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,20 +1,27 @@
 package com.just.goap;
 
 import com.just.goap.graph.Graph;
+import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
-import com.just.goap.plan.PlanFactory;
 import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 
 public final class Agent<T> {
 
     public static <T> Agent<T> create() {
-        return new Agent<>();
+        return Agent.<T>builder().build();
     }
+
+    public static <T> Builder<T> builder() {
+        return new Builder<>();
+    }
+
+    private final PlanFactory<T> planFactory;
 
     private @Nullable Plan<T> currentPlan;
 
-    private Agent() {
+    private Agent(PlanFactory<T> planFactory) {
+        this.planFactory = planFactory;
         this.currentPlan = null;
     }
 
@@ -24,7 +31,7 @@ public final class Agent<T> {
         var currentPlan = this.currentPlan;
 
         if (currentPlan == null) {
-            currentPlan = PlanFactory.create(graph, context, worldState);
+            currentPlan = planFactory.create(graph, context, worldState);
         }
 
         if (currentPlan != null) {
@@ -46,5 +53,29 @@ public final class Agent<T> {
 
     public boolean hasPlan() {
         return currentPlan != null;
+    }
+
+    public interface PlanFactory<T> {
+
+        @Nullable
+        Plan<T> create(Graph<T> graph, T context, SensingMutableWorldState<T> worldState);
+    }
+
+    public static class Builder<T> {
+
+        private PlanFactory<T> planFactory;
+
+        private Builder() {
+            this.planFactory = DefaultPlanFactory::create;
+        }
+
+        public Builder<T> withPlanFactory(PlanFactory<T> planFactory) {
+            this.planFactory = planFactory;
+            return this;
+        }
+
+        public Agent<T> build() {
+            return new Agent<>(planFactory);
+        }
     }
 }
