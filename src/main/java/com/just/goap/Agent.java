@@ -20,19 +20,24 @@ public final class Agent<T> {
 
     public void update(Graph<T> graph, T context) {
         var worldState = new SensingMutableWorldState<>(context, graph.getSensorMap());
+        // Local capture of current plan just in case agent plan is abandoned from another thread.
+        var currentPlan = this.currentPlan;
 
-        if (!hasPlan()) {
-            this.currentPlan = PlanFactory.create(graph, context, worldState);
+        if (currentPlan == null) {
+            currentPlan = PlanFactory.create(graph, context, worldState);
         }
 
-        if (hasPlan()) {
+        if (currentPlan != null) {
             var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
-                case FAILED, FINISHED, INVALID -> abandonPlan();
+                case FAILED, FINISHED, INVALID -> currentPlan = null;
                 case IN_PROGRESS -> {/* NO-OP */}
             }
         }
+
+        // Assign current plan to whatever the plan factory came up with (if anything).
+        this.currentPlan = currentPlan;
     }
 
     public void abandonPlan() {
