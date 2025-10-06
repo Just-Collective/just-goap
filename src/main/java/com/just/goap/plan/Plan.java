@@ -21,12 +21,15 @@ public class Plan<T> {
 
     private int currentActionIndex;
 
+    private int currentActionTick;
+
     public Plan(Goal goal, List<Action<T>> actions) {
         this.goal = goal;
         this.actions = actions;
         this.blackboard = new Blackboard();
         this.actionsString = Lazy.of(() -> actions.stream().map(Action::getName).collect(Collectors.joining(", ")));
         this.currentActionIndex = 0;
+        this.currentActionTick = 0;
     }
 
     public State update(T context, ReadableWorldState currentState) {
@@ -59,8 +62,16 @@ public class Plan<T> {
             return State.INVALID;
         }
 
+        if (currentActionTick == 0) {
+            // Trigger onStart callback for the action if the current tick is the first tick.
+            currentAction.onStart(context, currentState, blackboard);
+        }
+
         // Run the action.
         var result = currentAction.perform(context, currentState, blackboard);
+
+        // Increment the current action tick after performing the action.
+        currentActionTick++;
 
         return switch (result) {
             case CONTINUE -> State.IN_PROGRESS;
@@ -71,6 +82,8 @@ public class Plan<T> {
     private void proceedToNextAction() {
         // Move to the next action index.
         this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size());
+        // Reset the current action tick to 0.
+        this.currentActionTick = 0;
     }
 
     private State getPlanState() {

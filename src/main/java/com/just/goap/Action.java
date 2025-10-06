@@ -25,6 +25,8 @@ public class Action<T> {
 
     private final CostCallback<T> costCallback;
 
+    private final StartCallback<T> startCallback;
+
     private final PerformCallback<T> performCallback;
 
     private final FinishCallback<T> finishCallback;
@@ -36,6 +38,7 @@ public class Action<T> {
         ConditionContainer conditionContainer,
         EffectContainer effectContainer,
         CostCallback<T> costCallback,
+        StartCallback<T> startCallback,
         PerformCallback<T> performCallback,
         FinishCallback<T> finishCallback
     ) {
@@ -43,6 +46,7 @@ public class Action<T> {
         this.preconditions = conditionContainer;
         this.effects = effectContainer;
         this.costCallback = costCallback;
+        this.startCallback = startCallback;
         this.performCallback = performCallback;
         this.finishCallback = finishCallback;
     }
@@ -53,6 +57,10 @@ public class Action<T> {
 
     public Result perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
         return performCallback.accept(context, worldState, blackboard);
+    }
+
+    public void onStart(T context, ReadableWorldState worldState, Blackboard blackboard) {
+        startCallback.apply(context, worldState, blackboard);
     }
 
     public void onFinish(T context, ReadableWorldState worldState, Blackboard blackboard) {
@@ -84,6 +92,8 @@ public class Action<T> {
 
         private CostCallback<T> costCallback;
 
+        private StartCallback<T> startCallback;
+
         private PerformCallback<T> performCallback;
 
         private FinishCallback<T> finishCallback;
@@ -95,6 +105,7 @@ public class Action<T> {
             this.effects = new ArrayList<>();
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
+            this.startCallback = ($1, $2, $3) -> {};
             this.performCallback = ($1, $2, $3) -> Result.CONTINUE;
             this.finishCallback = ($1, $2, $3) -> {};
         }
@@ -135,6 +146,11 @@ public class Action<T> {
             return this;
         }
 
+        public Builder<T> withStartCallback(StartCallback<T> startCallback) {
+            this.startCallback = startCallback;
+            return this;
+        }
+
         public Builder<T> withPerformCallback(PerformCallback<T> performCallback) {
             this.performCallback = performCallback;
             return this;
@@ -155,6 +171,7 @@ public class Action<T> {
                 ConditionContainer.of(Collections.unmodifiableList(preconditions)),
                 EffectContainer.of(Collections.unmodifiableList(effects)),
                 costCallback,
+                startCallback,
                 performCallback,
                 finishCallback
             );
@@ -170,6 +187,12 @@ public class Action<T> {
     public interface CostCallback<T> {
 
         float apply(T context, ReadableWorldState worldState);
+    }
+
+    @FunctionalInterface
+    public interface StartCallback<T> {
+
+        void apply(T context, ReadableWorldState worldState, Blackboard blackboard);
     }
 
     @FunctionalInterface
