@@ -29,10 +29,14 @@ public final class Agent<T> {
             var planState = currentPlan.update(context, worldState);
 
             switch (planState) {
-                case FAILED, FINISHED, INVALID -> this.currentPlan = null;
+                case FAILED, FINISHED, INVALID -> abandonPlan();
                 case IN_PROGRESS -> {/* NO-OP */}
             }
         }
+    }
+
+    public void abandonPlan() {
+        this.currentPlan = null;
     }
 
     public boolean hasPlan() {
