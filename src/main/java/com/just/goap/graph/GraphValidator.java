@@ -2,9 +2,9 @@ package com.just.goap.graph;
 
 import com.just.goap.Action;
 import com.just.goap.Goal;
-import com.just.goap.Sensor;
 import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
+import com.just.goap.sensor.Sensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ class GraphValidator {
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         var validationErrorCollector = new ValidationErrorCollector();
 
@@ -41,7 +41,7 @@ class GraphValidator {
     private static <T> void validateGoalPreconditionSatisfiabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
         Set<Goal> availableGoals,
-        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         for (var goal : availableGoals) {
             // Check goal preconditions. Preconditions always require a sensor.
@@ -66,7 +66,7 @@ class GraphValidator {
     private static <T> void validateKeySatisfiabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
         Set<Action<T>> availableActions,
-        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         // Map each key to its producing actions.
         var derivedKeyProducerMap = new HashMap<StateKey.Derived<?>, Set<Action<T>>>();

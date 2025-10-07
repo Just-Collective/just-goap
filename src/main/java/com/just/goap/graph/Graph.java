@@ -2,9 +2,9 @@ package com.just.goap.graph;
 
 import com.just.goap.Action;
 import com.just.goap.Goal;
-import com.just.goap.Sensor;
 import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
+import com.just.goap.sensor.Sensor;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -12,9 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Graph<T> {
 
@@ -28,13 +26,13 @@ public class Graph<T> {
 
     private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-    private final Map<StateKey<?>, Sensor<? super T, ?>> sensorMap;
+    private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
     private Graph(
         Set<Action<T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
-        Map<StateKey<?>, Sensor<? super T, ?>> sensorMap
+        Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
@@ -54,7 +52,7 @@ public class Graph<T> {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
-    public Map<StateKey<?>, Sensor<? super T, ?>> getSensorMap() {
+    public Map<StateKey<?>, Sensor<? super T>> getSensorMap() {
         return sensorMap;
     }
 
@@ -66,7 +64,7 @@ public class Graph<T> {
 
         private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
 
-        private final Map<StateKey<?>, Sensor<? super T, ?>> sensorMap;
+        private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
         private Builder() {
             this.availableActions = new HashSet<>();
@@ -75,25 +73,13 @@ public class Graph<T> {
             this.sensorMap = new HashMap<>();
         }
 
-        public Builder<T> addSensors(Collection<Sensor<T, ?>> sensors) {
+        public Builder<T> addSensors(Collection<Sensor<T>> sensors) {
             sensors.forEach(this::addSensor);
             return this;
         }
 
-        public <U> Builder<T> addSensor(StateKey.Sensed<U> key, Function<? super T, ? extends U> extractor) {
-            return addSensor(Sensor.direct(key, extractor));
-        }
-
-        public <U, V> Builder<T> addSensor(
-            StateKey.Sensed<U> key,
-            StateKey.Sensed<V> sourceKey,
-            BiFunction<? super T, ? super V, ? extends U> extractor
-        ) {
-            return addSensor(Sensor.derived(key, sourceKey, extractor));
-        }
-
-        public <U> Builder<T> addSensor(Sensor<? super T, ? extends U> sensor) {
-            sensorMap.put(sensor.key(), sensor);
+        public Builder<T> addSensor(Sensor<T> sensor) {
+            sensor.outputKeys().forEach(key -> sensorMap.put(key, sensor));
             return this;
         }
 
