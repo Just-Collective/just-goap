@@ -73,12 +73,12 @@ public class Graph<T> {
             this.sensorMap = new HashMap<>();
         }
 
-        public Builder<T> addSensors(Collection<Sensor<T>> sensors) {
+        public Builder<T> addSensors(Collection<? extends Sensor<? super T>> sensors) {
             sensors.forEach(this::addSensor);
             return this;
         }
 
-        public Builder<T> addSensor(Sensor<T> sensor) {
+        public Builder<T> addSensor(Sensor<? super T> sensor) {
             sensor.outputKeys().forEach(key -> sensorMap.put(key, sensor));
             return this;
         }
