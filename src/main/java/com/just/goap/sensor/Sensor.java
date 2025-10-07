@@ -85,7 +85,7 @@ public sealed interface Sensor<T> {
         StateKey.Sensed<O2> outputKeyB,
         Function2<? super T, ? super W, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new Multi.LazyDecompose2<>(outputKeyA, outputKeyB, (context, worldState) -> {
+        return new Multi.LazyDecompose2<T, W, O1, O2>(outputKeyA, outputKeyB, (context, worldState) -> {
             var tuple = extractor.apply(context, worldState);
             return Map.of(
                 outputKeyA,
@@ -102,7 +102,7 @@ public sealed interface Sensor<T> {
         StateKey.Sensed<O2> outputKeyB,
         Function2<? super T, ? super I1, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new Multi.Map1To2<>(sourceKeyA, outputKeyA, outputKeyB, (context, sourceA) -> {
+        return new Multi.Map1To2<T, I1, O1, O2>(sourceKeyA, outputKeyA, outputKeyB, (context, sourceA) -> {
             var tuple = extractor.apply(context, sourceA);
             return Map.of(
                 outputKeyA,
@@ -120,15 +120,21 @@ public sealed interface Sensor<T> {
         StateKey.Sensed<O2> outputKeyB,
         Function3<? super T, ? super I1, ? super I2, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new Multi.Map2To2<>(sourceKeyA, sourceKeyB, outputKeyA, outputKeyB, (context, sourceA, sourceB) -> {
-            var tuple = extractor.apply(context, sourceA, sourceB);
-            return Map.of(
-                outputKeyA,
-                tuple.v1(),
-                outputKeyB,
-                tuple.v2()
-            );
-        });
+        return new Multi.Map2To2<T, I1, I2, O1, O2>(
+            sourceKeyA,
+            sourceKeyB,
+            outputKeyA,
+            outputKeyB,
+            (context, sourceA, sourceB) -> {
+                var tuple = extractor.apply(context, sourceA, sourceB);
+                return Map.of(
+                    outputKeyA,
+                    tuple.v1(),
+                    outputKeyB,
+                    tuple.v2()
+                );
+            }
+        );
     }
 
     Set<StateKey.Sensed<?>> outputKeys();
