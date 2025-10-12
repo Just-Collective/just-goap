@@ -22,13 +22,13 @@ public final class AOStar {
     public static <T> @Nullable List<Action<T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
-        SensingMutableWorldState<T> startState,
+        SensingWorldState<T> startState,
         T context
     ) {
         var open = new PriorityQueue<AOStarNode<T>>(Comparator.comparingDouble(node -> node.fCost));
 
         var rootUnsatisfied = desiredConditions.filterUnsatisfied(startState);
-        var rootState = startState.copy();
+        var rootState = new SimulatedWorldState<>(startState);
 
         LOGGER.trace("Start state: {}", startState);
         LOGGER.trace("Root unsatisfied conditions: {}", rootUnsatisfied.getConditions());
@@ -148,7 +148,7 @@ public final class AOStar {
     record AOStarNode<T>(
         ConditionContainer unsatisfiedConditions,
         List<Action<T>> planSoFar,
-        SensingMutableWorldState<T> simulatedState,
+        SimulatedWorldState<T> simulatedState,
         // cost so far
         float gCost,
         // heuristic estimate
@@ -160,7 +160,7 @@ public final class AOStar {
         AOStarNode(
             ConditionContainer unsatisfiedConditions,
             List<Action<T>> planSoFar,
-            SensingMutableWorldState<T> simulatedState,
+            SimulatedWorldState<T> simulatedState,
             float gCost,
             float hCost
         ) {

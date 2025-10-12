@@ -1,10 +1,11 @@
 package com.just.goap;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
-import com.just.goap.state.SensingMutableWorldState;
-import org.jetbrains.annotations.Nullable;
+import com.just.goap.state.SensingWorldState;
 
 public final class Agent<T> {
 
@@ -26,7 +27,7 @@ public final class Agent<T> {
     }
 
     public void update(Graph<T> graph, T context) {
-        var worldState = new SensingMutableWorldState<>(context, graph.getSensorMap());
+        var worldState = new SensingWorldState<>(context, graph.getSensorMap());
         // Local capture of current plan just in case agent plan is abandoned from another thread.
         var currentPlan = this.currentPlan;
 
@@ -58,7 +59,7 @@ public final class Agent<T> {
     public interface PlanFactory<T> {
 
         @Nullable
-        Plan<T> create(Graph<T> graph, T context, SensingMutableWorldState<T> worldState);
+        Plan<T> create(Graph<T> graph, T context, SensingWorldState<T> worldState);
     }
 
     public static class Builder<T> {

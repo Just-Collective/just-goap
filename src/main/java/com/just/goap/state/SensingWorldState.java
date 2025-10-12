@@ -1,13 +1,13 @@
 package com.just.goap.state;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.just.goap.StateKey;
 import com.just.goap.effect.EffectContainer;
 import com.just.goap.sensor.Sensor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public final class SensingMutableWorldState<T> implements WorldState {
+public final class SensingWorldState<T> implements WorldState {
 
     private final T context;
 
@@ -15,11 +15,11 @@ public final class SensingMutableWorldState<T> implements WorldState {
 
     private final Map<StateKey<?>, Object> stateMap;
 
-    public SensingMutableWorldState(T context, Map<StateKey<?>, Sensor<? super T>> sensorMap) {
+    public SensingWorldState(T context, Map<StateKey<?>, Sensor<? super T>> sensorMap) {
         this(context, sensorMap, new HashMap<>());
     }
 
-    private SensingMutableWorldState(
+    private SensingWorldState(
         T context,
         Map<StateKey<?>, Sensor<? super T>> sensorMap,
         Map<StateKey<?>, Object> stateMap
@@ -138,7 +138,7 @@ public final class SensingMutableWorldState<T> implements WorldState {
     }
 
     @Override
-    public Map<StateKey<?>, ?> getMap() {
+    public Map<StateKey<?>, Object> getMap() {
         return stateMap;
     }
 
@@ -153,8 +153,8 @@ public final class SensingMutableWorldState<T> implements WorldState {
     }
 
     @Override
-    public SensingMutableWorldState<T> copy() {
-        return new SensingMutableWorldState<>(context, sensorMap, new HashMap<>(stateMap));
+    public SensingWorldState<T> copy() {
+        return new SensingWorldState<>(context, sensorMap, new HashMap<>(stateMap));
     }
 
     @Override

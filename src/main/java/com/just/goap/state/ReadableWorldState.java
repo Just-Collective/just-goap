@@ -16,7 +16,7 @@ public interface ReadableWorldState extends Satisfiable, Satisfier {
 
     <T> @Nullable T getOrNull(StateKey<T> key);
 
-    Map<StateKey<?>, ?> getMap();
+    Map<StateKey<?>, Object> getMap();
 
     @Override
     default boolean satisfiedBy(ReadableWorldState worldState) {

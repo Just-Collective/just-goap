@@ -24,7 +24,7 @@ public interface WorldState extends ReadableWorldState, WritableWorldState {
             }
 
             @Override
-            public Map<StateKey<?>, ?> getMap() {
+            public Map<StateKey<?>, Object> getMap() {
                 return stateMap;
             }
 
