@@ -1,9 +1,5 @@
 package com.just.goap;
 
-import com.just.goap.condition.ConditionContainer;
-import com.just.goap.graph.Graph;
-import com.just.goap.state.ReadableWorldState;
-import com.just.goap.state.SensingMutableWorldState;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +8,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+
+import com.just.goap.condition.ConditionContainer;
+import com.just.goap.graph.Graph;
+import com.just.goap.state.ReadableWorldState;
+import com.just.goap.state.SensingWorldState;
+import com.just.goap.state.SimulatedWorldState;
 
 public final class AOStar {
 

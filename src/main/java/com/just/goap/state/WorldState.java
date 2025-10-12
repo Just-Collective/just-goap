@@ -1,11 +1,12 @@
 package com.just.goap.state;
 
-import com.just.goap.StateKey;
-import com.just.goap.effect.EffectContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.just.goap.StateKey;
+import com.just.goap.effect.EffectContainer;
 
 public interface WorldState extends ReadableWorldState, WritableWorldState {
 

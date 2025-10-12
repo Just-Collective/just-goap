@@ -1,13 +1,13 @@
 package com.just.goap.plan;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.just.core.functional.function.Lazy;
 import com.just.goap.Action;
 import com.just.goap.Goal;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Plan<T> {
 

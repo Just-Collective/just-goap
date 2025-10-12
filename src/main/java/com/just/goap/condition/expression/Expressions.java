@@ -1,10 +1,10 @@
 package com.just.goap.condition.expression;
 
-import com.just.core.functional.range.Range;
-import com.just.core.functional.range.RangeSet;
-
 import java.util.Objects;
 import java.util.function.Predicate;
+
+import com.just.core.functional.range.Range;
+import com.just.core.functional.range.RangeSet;
 
 public class Expressions {
 

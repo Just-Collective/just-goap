@@ -1,5 +1,10 @@
 package com.just.goap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.UnaryOperator;
+
 import com.just.goap.condition.Condition;
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.condition.expression.Expression;
@@ -7,11 +12,6 @@ import com.just.goap.effect.Effect;
 import com.just.goap.effect.EffectContainer;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.UnaryOperator;
 
 public class Action<T> {
 

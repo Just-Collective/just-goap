@@ -1,10 +1,10 @@
 package com.just.goap.effect;
 
+import java.util.List;
+
 import com.just.core.functional.function.Lazy;
 import com.just.goap.state.ReadableWorldState;
 import com.just.goap.state.WorldState;
-
-import java.util.List;
 
 public final class EffectContainer {
 

@@ -1,13 +1,13 @@
 package com.just.goap.condition;
 
-import com.just.goap.Satisfiable;
-import com.just.goap.state.ReadableWorldState;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.just.goap.Satisfiable;
+import com.just.goap.state.ReadableWorldState;
 
 public class ConditionContainer implements Satisfiable {
 

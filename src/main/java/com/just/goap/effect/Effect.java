@@ -1,9 +1,9 @@
 package com.just.goap.effect;
 
+import java.util.function.UnaryOperator;
+
 import com.just.goap.StateKey;
 import com.just.goap.state.WorldState;
-
-import java.util.function.UnaryOperator;
 
 public sealed interface Effect<T> {
 

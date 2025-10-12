@@ -1,12 +1,12 @@
 package com.just.goap;
 
-import com.just.goap.condition.Condition;
-import com.just.goap.condition.ConditionContainer;
-import com.just.goap.condition.expression.Expression;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.just.goap.condition.Condition;
+import com.just.goap.condition.ConditionContainer;
+import com.just.goap.condition.expression.Expression;
 
 public final class Goal {
 

@@ -1,10 +1,5 @@
 package com.just.goap.graph;
 
-import com.just.goap.Action;
-import com.just.goap.Goal;
-import com.just.goap.StateKey;
-import com.just.goap.condition.Condition;
-import com.just.goap.sensor.Sensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +8,12 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.just.goap.Action;
+import com.just.goap.Goal;
+import com.just.goap.StateKey;
+import com.just.goap.condition.Condition;
+import com.just.goap.sensor.Sensor;
 
 class GraphValidator {
 

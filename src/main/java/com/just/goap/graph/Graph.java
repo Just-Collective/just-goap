@@ -1,11 +1,5 @@
 package com.just.goap.graph;
 
-import com.just.goap.Action;
-import com.just.goap.Goal;
-import com.just.goap.StateKey;
-import com.just.goap.condition.Condition;
-import com.just.goap.sensor.Sensor;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +7,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import com.just.goap.Action;
+import com.just.goap.Goal;
+import com.just.goap.StateKey;
+import com.just.goap.condition.Condition;
+import com.just.goap.sensor.Sensor;
 
 public class Graph<T> {
 

@@ -1,11 +1,11 @@
 package com.just.goap.state;
 
-import com.just.core.functional.option.Option;
-import com.just.goap.StateKey;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import com.just.core.functional.option.Option;
+import com.just.goap.StateKey;
 
 public class Blackboard {
 

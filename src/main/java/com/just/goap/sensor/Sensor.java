@@ -1,5 +1,8 @@
 package com.just.goap.sensor;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.just.core.functional.function.Function;
 import com.just.core.functional.function.Function2;
 import com.just.core.functional.function.Function3;
@@ -8,9 +11,6 @@ import com.just.core.functional.tuple.Tuple2;
 import com.just.core.functional.tuple.Tuple3;
 import com.just.goap.StateKey;
 import com.just.goap.state.ReadableWorldState;
-
-import java.util.Map;
-import java.util.Set;
 
 public sealed interface Sensor<T> {
 
