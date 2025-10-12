@@ -57,59 +57,52 @@ public final class AOStar {
                 return node.planSoFar.reversed();
             }
 
-            // Expand the node: pick one unsatisfied condition
-            var iterator = node.unsatisfiedConditions.getConditions().iterator();
+            for (var condition : node.unsatisfiedConditions.getConditions()) {
+                LOGGER.trace("Expanding condition: {}", condition);
 
-            if (!iterator.hasNext()) {
-                LOGGER.trace("No conditions to expand, skipping.");
-                continue;
-            }
+                var satisfyingActions = graph.getActionsThatSatisfy(condition);
+                LOGGER.trace("Candidate actions: {}", satisfyingActions);
 
-            var condition = iterator.next();
-            LOGGER.trace("Expanding condition: {}", condition);
+                for (var action : satisfyingActions) {
+                    LOGGER.trace(" Trying action: {}", action);
+                    // Simulate applying the action
+                    var newState = node.simulatedState.copy();
+                    newState.apply(action.getEffectContainer());
+                    LOGGER.trace("  Applied effects, new state: {}", newState);
 
-            var satisfyingActions = graph.getActionsThatSatisfy(condition);
-            LOGGER.trace("Candidate actions: {}", satisfyingActions);
+                    // Collect remaining unsatisfied conditions (action’s preconditions + what was left).
 
-            for (var action : satisfyingActions) {
-                LOGGER.trace(" Trying action: {}", action);
-                // Simulate applying the action
-                var newState = node.simulatedState.copy();
-                newState.apply(action.getEffectContainer());
-                LOGGER.trace("  Applied effects, new state: {}", newState);
+                    // Preconditions must be true before the action runs
+                    var unmetPreconditions = action.getPreconditionContainer()
+                        .filterUnsatisfied(node.simulatedState);
 
-                // Collect remaining unsatisfied conditions (action’s preconditions + what was left).
+                    // Remaining desired conditions that weren’t satisfied by this action.
+                    var remaining = node.unsatisfiedConditions
+                        .without(condition)
+                        .filterUnsatisfied(newState);
 
-                // Preconditions must be true before the action runs
-                var unmetPreconditions = action.getPreconditionContainer()
-                    .filterUnsatisfied(node.simulatedState);
+                    // Union what’s left of the original goals + action’s unmet preconditions.
+                    var newUnsatisfied = remaining.union(unmetPreconditions);
 
-                // Remaining desired conditions that weren’t satisfied by this action.
-                var remaining = node.unsatisfiedConditions
-                    .without(condition)
-                    .filterUnsatisfied(newState);
+                    LOGGER.trace("  New unsatisfied after action: {}", newUnsatisfied.getConditions());
 
-                // Union what’s left of the original goals + action’s unmet preconditions.
-                var newUnsatisfied = remaining.union(unmetPreconditions);
+                    // Build plan so far
+                    var newPlan = new ArrayList<>(node.planSoFar);
+                    newPlan.add(action);
 
-                LOGGER.trace("  New unsatisfied after action: {}", newUnsatisfied.getConditions());
+                    // Costs
+                    var g = node.gCost + action.getCost(context, node.simulatedState);
+                    var h = heuristic(newUnsatisfied, graph, context, node.simulatedState);
+                    LOGGER.trace(
+                        "  Action cost={} → g={} h={} f={}",
+                        action.getCost(context, node.simulatedState),
+                        g,
+                        h,
+                        g + h
+                    );
 
-                // Build plan so far
-                var newPlan = new ArrayList<>(node.planSoFar);
-                newPlan.add(action);
-
-                // Costs
-                var g = node.gCost + action.getCost(context, node.simulatedState);
-                var h = heuristic(newUnsatisfied, graph, context, node.simulatedState);
-                LOGGER.trace(
-                    "  Action cost={} → g={} h={} f={}",
-                    action.getCost(context, node.simulatedState),
-                    g,
-                    h,
-                    g + h
-                );
-
-                open.add(new AOStarNode<>(newUnsatisfied, newPlan, newState, g, h));
+                    open.add(new AOStarNode<>(newUnsatisfied, newPlan, newState, g, h));
+                }
             }
         }
 
