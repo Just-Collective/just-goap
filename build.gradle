@@ -4,10 +4,11 @@ plugins {
     id 'jacoco'
     id 'com.diffplug.spotless'
     id 'com.github.ben-manes.versions'
+    id 'maven-publish'
 }
 
-group = 'com.bvanseg.just'
-version = '0.1.0'
+group = project.groupId
+version = project.version
 
 java {
     var version = JavaVersion.VERSION_21
@@ -18,21 +19,21 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven { url = project.mavenUrl }
 }
 
 dependencies {
-    api 'com.github.just-collective:just-core:a2d21a3e56'
-    api "org.slf4j:slf4j-api:2.0.17"
+    api "com.just:just-core:${project.justCoreVersion}"
+    api "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
-    compileOnly 'org.jetbrains:annotations:26.0.2'
+    compileOnly "org.jetbrains:annotations:${project.jetbrainsAnnotationsVersion}"
 
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}"
 
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation platform("org.junit:junit-bom:${project.junitBomVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.18")
+    testRuntimeOnly("ch.qos.logback:logback-classic:${project.logbackClassicVersion}")
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
@@ -48,7 +49,7 @@ spotless {
 }
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = project.jacocoVersion
 }
 
 build {
@@ -91,7 +92,6 @@ jacocoTestReport {
     }
 }
 
-
 jacocoTestCoverageVerification {
     violationRules {
         rule {
@@ -109,6 +109,34 @@ jacocoTestCoverageVerification {
                 counter = 'LINE'
                 value = 'TOTALCOUNT'
             }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = 'Just'
+            url = uri(project.mavenUrl)
+
+            credentials {
+                username = System.getenv("JUST_MAVEN_USERNAME")
+                password = System.getenv("JUST_MAVEN_PASSWORD")
+            }
+
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            groupId = project.groupId
+            artifactId = project.artifactId
+            version = project.version
+
+            from components.java
         }
     }
 }
