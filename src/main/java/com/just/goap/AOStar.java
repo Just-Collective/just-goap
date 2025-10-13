@@ -19,7 +19,7 @@ public final class AOStar {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AOStar.class);
 
-    public static <T> @Nullable List<Action<T>> solve(
+    public static <T> @Nullable List<Action<? super T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
         SensingWorldState<T> currentWorldState,
@@ -140,7 +140,7 @@ public final class AOStar {
 
     record AOStarNode<T>(
         ConditionContainer unsatisfiedConditions,
-        List<Action<T>> planSoFar,
+        List<Action<? super T>> planSoFar,
         SimulatedWorldState<T> simulatedState,
         // cost so far
         float gCost,
@@ -152,7 +152,7 @@ public final class AOStar {
 
         AOStarNode(
             ConditionContainer unsatisfiedConditions,
-            List<Action<T>> planSoFar,
+            List<Action<? super T>> planSoFar,
             SimulatedWorldState<T> simulatedState,
             float gCost,
             float hCost

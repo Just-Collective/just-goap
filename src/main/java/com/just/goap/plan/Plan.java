@@ -13,7 +13,7 @@ public class Plan<T> {
 
     private final Goal goal;
 
-    private final List<Action<T>> actions;
+    private final List<Action<? super T>> actions;
 
     private final Blackboard blackboard;
 
@@ -23,7 +23,7 @@ public class Plan<T> {
 
     private int currentActionTick;
 
-    public Plan(Goal goal, List<Action<T>> actions) {
+    public Plan(Goal goal, List<Action<? super T>> actions) {
         this.goal = goal;
         this.actions = actions;
         this.blackboard = new Blackboard();

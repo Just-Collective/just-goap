@@ -20,9 +20,9 @@ class GraphValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphValidator.class);
 
     static <T> void validate(
-        Set<Action<T>> availableActions,
+        Set<Action<? super T>> availableActions,
         Set<Goal> availableGoals,
-        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
+        Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap,
         Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         var validationErrorCollector = new ValidationErrorCollector();
@@ -66,11 +66,11 @@ class GraphValidator {
 
     private static <T> void validateKeySatisfiabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
-        Set<Action<T>> availableActions,
+        Set<Action<? super T>> availableActions,
         Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         // Map each key to its producing actions.
-        var derivedKeyProducerMap = new HashMap<StateKey.Derived<?>, Set<Action<T>>>();
+        var derivedKeyProducerMap = new HashMap<StateKey.Derived<?>, Set<Action<? super T>>>();
 
         for (var action : availableActions) {
             action.getEffectContainer().getEffects().forEach(effect -> {
@@ -142,11 +142,11 @@ class GraphValidator {
 
     private static <T> void validateActionContributionOrThrow(
         ValidationErrorCollector validationErrorCollector,
-        Set<Action<T>> availableActions,
+        Set<Action<? super T>> availableActions,
         Set<Goal> availableGoals
     ) {
         var usefulConditions = new HashSet<Condition<?>>();
-        var reachableActions = new HashSet<Action<T>>();
+        var reachableActions = new HashSet<Action<? super T>>();
 
         // Start from goal desired conditions.
         for (var goal : availableGoals) {
@@ -198,7 +198,7 @@ class GraphValidator {
     private static <T> void validateGoalReachabilityOrThrow(
         ValidationErrorCollector validationErrorCollector,
         Set<Goal> availableGoals,
-        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap
+        Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap
     ) {
         for (var goal : availableGoals) {
             for (var desiredCondition : goal.getDesiredConditions().getConditions()) {

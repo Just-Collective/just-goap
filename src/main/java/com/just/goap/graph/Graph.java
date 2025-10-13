@@ -20,18 +20,18 @@ public class Graph<T> {
         return new Builder<>();
     }
 
-    private final Set<Action<T>> availableActions;
+    private final Set<Action<? super T>> availableActions;
 
     private final Set<Goal> availableGoals;
 
-    private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
+    private final Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap;
 
     private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
     private Graph(
-        Set<Action<T>> availableActions,
+        Set<Action<? super T>> availableActions,
         Set<Goal> availableGoals,
-        Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap,
+        Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap,
         Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         this.availableActions = availableActions;
@@ -40,7 +40,7 @@ public class Graph<T> {
         this.sensorMap = sensorMap;
     }
 
-    public Set<Action<T>> getAvailableActions() {
+    public Set<Action<? super T>> getAvailableActions() {
         return availableActions;
     }
 
@@ -48,7 +48,7 @@ public class Graph<T> {
         return availableGoals;
     }
 
-    public Set<Action<T>> getActionsThatSatisfy(Condition<?> condition) {
+    public Set<Action<? super T>> getActionsThatSatisfy(Condition<?> condition) {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
@@ -58,11 +58,11 @@ public class Graph<T> {
 
     public static class Builder<T> {
 
-        private final Set<Action<T>> availableActions;
+        private final Set<Action<? super T>> availableActions;
 
         private final Set<Goal> availableGoals;
 
-        private final Map<Condition<?>, Set<Action<T>>> preconditionToSatisfyingActionsMap;
+        private final Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap;
 
         private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
@@ -112,12 +112,12 @@ public class Graph<T> {
             return this;
         }
 
-        public Builder<T> addActions(Collection<Action<T>> actions) {
+        public Builder<T> addActions(Collection<Action<? super T>> actions) {
             actions.forEach(this::addAction);
             return this;
         }
 
-        public Builder<T> addAction(Action<T> action) {
+        public Builder<T> addAction(Action<? super T> action) {
             if (action.getEffectContainer().getEffects().isEmpty()) {
                 throw new IllegalArgumentException("Action must have at least one effect: " + action);
             }
