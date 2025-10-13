@@ -22,15 +22,15 @@ public final class AOStar {
     public static <T> @Nullable List<Action<T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
-        SensingWorldState<T> startState,
+        SensingWorldState<T> currentWorldState,
         T context
     ) {
         var open = new PriorityQueue<AOStarNode<T>>(Comparator.comparingDouble(node -> node.fCost));
 
-        var rootUnsatisfied = desiredConditions.filterUnsatisfied(startState);
-        var rootState = new SimulatedWorldState<>(startState);
+        var rootUnsatisfied = desiredConditions.filterUnsatisfied(currentWorldState);
+        var rootState = new SimulatedWorldState<>(currentWorldState);
 
-        LOGGER.trace("Start state: {}", startState);
+        LOGGER.trace("Start state: {}", currentWorldState);
         LOGGER.trace("Root unsatisfied conditions: {}", rootUnsatisfied.getConditions());
 
         open.add(
@@ -39,7 +39,7 @@ public final class AOStar {
                 new ArrayList<>(),
                 rootState,
                 0.0f,
-                heuristic(rootUnsatisfied, graph, context, startState)
+                heuristic(rootUnsatisfied, graph, context, currentWorldState)
             )
         );
 
@@ -74,7 +74,7 @@ public final class AOStar {
 
                     // Preconditions must be true before the action runs
                     var unmetPreconditions = action.getPreconditionContainer()
-                        .filterUnsatisfied(node.simulatedState);
+                        .filterUnsatisfied(currentWorldState);
 
                     // Remaining desired conditions that weren’t satisfied by this action.
                     var remaining = node.unsatisfiedConditions
