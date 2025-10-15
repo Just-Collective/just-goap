@@ -35,7 +35,9 @@ public interface WorldState extends ReadableWorldState, WritableWorldState {
 
             @Override
             public void apply(EffectContainer effectContainer) {
-                effectContainer.getEffects().forEach(effect -> effect.apply(this));
+                for (var effect : effectContainer.getEffects()) {
+                    effect.apply(this);
+                }
             }
 
             @Override

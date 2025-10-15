@@ -6,6 +6,8 @@ import java.util.Objects;
 
 public sealed abstract class StateKey<T> {
 
+    private static final int UNSET = Integer.MIN_VALUE;
+
     public static <T> Derived<T> derived(String id) {
         return new Derived<>(id);
     }
@@ -15,6 +17,8 @@ public sealed abstract class StateKey<T> {
     }
 
     protected final String id;
+
+    private transient int cachedHashCode = UNSET;
 
     protected StateKey(String id) {
         this.id = id;
@@ -39,7 +43,14 @@ public sealed abstract class StateKey<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        var hashCode = cachedHashCode;
+
+        if (hashCode == UNSET) {
+            hashCode = id.hashCode();
+            cachedHashCode = hashCode;
+        }
+
+        return hashCode;
     }
 
     public static final class Derived<T> extends StateKey<T> {

@@ -65,7 +65,9 @@ public final class SensingWorldState<T> implements WorldState {
 
     @Override
     public void apply(EffectContainer effectContainer) {
-        effectContainer.getEffects().forEach(effect -> effect.apply(this));
+        for (var effect : effectContainer.getEffects()) {
+            effect.apply(this);
+        }
     }
 
     @Override

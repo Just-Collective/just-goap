@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.just.goap.Satisfiable;
 import com.just.goap.state.ReadableWorldState;
@@ -27,22 +26,36 @@ public class ConditionContainer implements Satisfiable {
 
     @Override
     public boolean satisfiedBy(ReadableWorldState worldState) {
-        return conditions.stream().allMatch(condition -> condition.satisfiedBy(worldState));
+        for (Condition<?> condition : conditions) {
+            if (!condition.satisfiedBy(worldState)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public ConditionContainer filterUnsatisfied(ReadableWorldState worldState) {
-        var unsatisfied = conditions.stream()
-            .filter(condition -> !condition.satisfiedBy(worldState))
-            .collect(Collectors.toList());
+        var unsatisfied = new ArrayList<Condition<?>>();
+
+        for (var condition : conditions) {
+            if (!condition.satisfiedBy(worldState)) {
+                unsatisfied.add(condition);
+            }
+        }
 
         return new ConditionContainer(unsatisfied);
     }
 
     public ConditionContainer without(Condition<?>... toRemove) {
         var removeSet = Set.of(toRemove);
-        var remaining = conditions.stream()
-            .filter(cond -> !removeSet.contains(cond))
-            .toList();
+        var remaining = new ArrayList<Condition<?>>();
+
+        for (var condition : conditions) {
+            if (!removeSet.contains(condition)) {
+                remaining.add(condition);
+            }
+        }
 
         return new ConditionContainer(remaining);
     }

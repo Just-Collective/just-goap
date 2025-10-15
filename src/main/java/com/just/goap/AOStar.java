@@ -19,13 +19,15 @@ public final class AOStar {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AOStar.class);
 
+    private static final Comparator<AOStarNode<?>> F_COST_COMPARATOR = Comparator.comparingDouble(node -> node.fCost);
+
     public static <T> @Nullable List<Action<? super T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
         SensingWorldState<T> currentWorldState,
         T context
     ) {
-        var open = new PriorityQueue<AOStarNode<T>>(Comparator.comparingDouble(node -> node.fCost));
+        var open = new PriorityQueue<AOStarNode<T>>(F_COST_COMPARATOR);
 
         var rootUnsatisfied = desiredConditions.filterUnsatisfied(currentWorldState);
         var rootState = new SimulatedWorldState<>(currentWorldState);
@@ -86,11 +88,11 @@ public final class AOStar {
 
                     LOGGER.trace("  New unsatisfied after action: {}", newUnsatisfied.getConditions());
 
-                    // Build plan so far
+                    // Build plan so far.
                     var newPlan = new ArrayList<>(node.planSoFar);
                     newPlan.add(action);
 
-                    // Costs
+                    // Costs.
                     var g = node.gCost + action.getCost(context, node.simulatedState);
                     var h = heuristic(newUnsatisfied, graph, context, node.simulatedState);
                     LOGGER.trace(
@@ -114,7 +116,7 @@ public final class AOStar {
         ConditionContainer unsatisfied,
         Graph<T> graph,
         T context,
-        ReadableWorldState state
+        ReadableWorldState worldState
     ) {
         var h = 0.0f;
 
@@ -122,12 +124,18 @@ public final class AOStar {
             var candidates = graph.getActionsThatSatisfy(condition);
 
             if (!candidates.isEmpty()) {
-                var minCost = candidates.stream()
-                    .map(a -> a.getCost(context, state))
-                    .min(Float::compare)
-                    .orElse(Float.MAX_VALUE);
+                var minCost = Float.MAX_VALUE;
+
+                for (var action : candidates) {
+                    var cost = action.getCost(context, worldState);
+
+                    if (cost < minCost) {
+                        minCost = cost;
+                    }
+                }
 
                 h += minCost;
+
             } else {
                 LOGGER.trace(" Heuristic: condition {} has no satisfiers → returning ∞", condition);
                 // No known action can satisfy this condition.
@@ -142,11 +150,11 @@ public final class AOStar {
         ConditionContainer unsatisfiedConditions,
         List<Action<? super T>> planSoFar,
         SimulatedWorldState<T> simulatedState,
-        // cost so far
+        // cost so far.
         float gCost,
-        // heuristic estimate
+        // heuristic estimate.
         float hCost,
-        // g + h
+        // g + h.
         float fCost
     ) {
 

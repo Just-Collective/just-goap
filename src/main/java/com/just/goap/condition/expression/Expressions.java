@@ -147,21 +147,45 @@ public class Expressions {
         public static <T> Expression<java.util.Collection<? extends T>> allMatch(Expression<? super T> inner) {
             return new Expression<>(
                 "all match: (" + inner + ")",
-                collection -> collection.stream().allMatch(inner::evaluate)
+                collection -> {
+                    for (var element : collection) {
+                        if (!inner.evaluate(element)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
 
         public static <T> Expression<java.util.Collection<? extends T>> anyMatch(Expression<? super T> inner) {
             return new Expression<>(
                 "any match: (" + inner + ")",
-                collection -> collection.stream().anyMatch(inner::evaluate)
+                collection -> {
+                    for (var element : collection) {
+                        if (inner.evaluate(element)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
             );
         }
 
         public static <T> Expression<java.util.Collection<? extends T>> noneMatch(Expression<? super T> inner) {
             return new Expression<>(
                 "none match: (" + inner + ")",
-                collection -> collection.stream().noneMatch(inner::evaluate)
+                collection -> {
+                    for (var element : collection) {
+                        if (inner.evaluate(element)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
     }
@@ -194,21 +218,45 @@ public class Expressions {
         public static <K> Expression<java.util.Map<? extends K, ?>> allKeysMatch(Expression<? super K> inner) {
             return new Expression<>(
                 "all keys match: (" + inner + ")",
-                map -> map.keySet().stream().allMatch(inner::evaluate)
+                map -> {
+                    for (var key : map.keySet()) {
+                        if (!inner.evaluate(key)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
 
         public static <K> Expression<java.util.Map<? extends K, ?>> anyKeyMatches(Expression<? super K> inner) {
             return new Expression<>(
                 "any key matches: (" + inner + ")",
-                map -> map.keySet().stream().anyMatch(inner::evaluate)
+                map -> {
+                    for (var key : map.keySet()) {
+                        if (inner.evaluate(key)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
             );
         }
 
         public static <K> Expression<java.util.Map<? extends K, ?>> noneKeyMatches(Expression<? super K> inner) {
             return new Expression<>(
                 "no key matches: (" + inner + ")",
-                map -> map.keySet().stream().noneMatch(inner::evaluate)
+                map -> {
+                    for (var key : map.keySet()) {
+                        if (inner.evaluate(key)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
 
@@ -222,21 +270,45 @@ public class Expressions {
         public static <K, V> Expression<java.util.Map<K, V>> allValuesMatch(Expression<? super V> inner) {
             return new Expression<>(
                 "all values match: (" + inner + ")",
-                map -> map.values().stream().allMatch(inner::evaluate)
+                map -> {
+                    for (var value : map.values()) {
+                        if (!inner.evaluate(value)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
 
         public static <K, V> Expression<java.util.Map<K, V>> anyValueMatches(Expression<? super V> inner) {
             return new Expression<>(
                 "any value matches: (" + inner + ")",
-                map -> map.values().stream().anyMatch(inner::evaluate)
+                map -> {
+                    for (var value : map.values()) {
+                        if (inner.evaluate(value)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
             );
         }
 
         public static <K, V> Expression<java.util.Map<K, V>> noneValueMatches(Expression<? super V> inner) {
             return new Expression<>(
                 "no values match: (" + inner + ")",
-                map -> map.values().stream().noneMatch(inner::evaluate)
+                map -> {
+                    for (var value : map.values()) {
+                        if (inner.evaluate(value)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             );
         }
     }
