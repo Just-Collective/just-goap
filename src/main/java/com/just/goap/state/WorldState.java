@@ -46,6 +46,11 @@ public interface WorldState extends ReadableWorldState, WritableWorldState {
             }
 
             @Override
+            public void clear() {
+                stateMap.clear();
+            }
+
+            @Override
             public WritableWorldState copy() {
                 return WorldState.create(new HashMap<>(stateMap));
             }

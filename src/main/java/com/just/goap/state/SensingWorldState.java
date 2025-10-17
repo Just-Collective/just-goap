@@ -76,6 +76,11 @@ public final class SensingWorldState<T> implements WorldState {
     }
 
     @Override
+    public void clear() {
+        stateMap.clear();
+    }
+
+    @Override
     public SensingWorldState<T> copy() {
         return new SensingWorldState<>(context, sensorMap, new HashMap<>(stateMap));
     }
