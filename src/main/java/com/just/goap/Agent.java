@@ -6,6 +6,7 @@ import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
 import com.just.goap.state.SensingWorldState;
+import com.just.goap.state.WorldState;
 
 public final class Agent<T> {
 
@@ -19,33 +20,23 @@ public final class Agent<T> {
 
     private final PlanFactory<T> planFactory;
 
+    private final WorldState previousWorldState;
+
+    private final SensingWorldState<T> currentWorldState;
+
     private @Nullable Plan<T> currentPlan;
 
     private Agent(PlanFactory<T> planFactory) {
         this.planFactory = planFactory;
         this.currentPlan = null;
+        this.previousWorldState = WorldState.create();
+        this.currentWorldState = new SensingWorldState<>();
     }
 
     public void update(Graph<T> graph, T context) {
-        var worldState = new SensingWorldState<>(context, graph.getSensorMap());
-        // Local capture of current plan just in case agent plan is abandoned from another thread.
-        var currentPlan = this.currentPlan;
-
-        if (currentPlan == null) {
-            currentPlan = planFactory.create(graph, context, worldState);
-        }
-
-        if (currentPlan != null) {
-            var planState = currentPlan.update(context, worldState);
-
-            switch (planState) {
-                case ABORTED, FINISHED, INVALID -> currentPlan = null;
-                case IN_PROGRESS -> {/* NO-OP */}
-            }
-        }
-
-        // Assign current plan to whatever the plan factory came up with (if anything).
-        this.currentPlan = currentPlan;
+        prepareWorldStates(graph, context);
+        createPlan(graph, context);
+        updatePlan(context);
     }
 
     public void abandonPlan() {
@@ -54,6 +45,35 @@ public final class Agent<T> {
 
     public boolean hasPlan() {
         return currentPlan != null;
+    }
+
+    private void prepareWorldStates(Graph<T> graph, T context) {
+        currentWorldState.setSensorMap(graph.getSensorMap());
+        currentWorldState.setContext(context);
+
+        // Clear the previous world state.
+        previousWorldState.clear();
+        // Set the previous world state's contents to the current world state's contents.
+        previousWorldState.setAll(currentWorldState.getMap());
+        // Clear current world state before we use it.
+        currentWorldState.clear();
+    }
+
+    private void createPlan(Graph<T> graph, T context) {
+        if (currentPlan == null) {
+            this.currentPlan = planFactory.create(graph, context, currentWorldState);
+        }
+    }
+
+    private void updatePlan(T context) {
+        if (currentPlan != null) {
+            var planState = currentPlan.update(context, currentWorldState);
+
+            switch (planState) {
+                case ABORTED, FINISHED, INVALID -> this.currentPlan = null;
+                case IN_PROGRESS -> {/* NO-OP */}
+            }
+        }
     }
 
     public interface PlanFactory<T> {

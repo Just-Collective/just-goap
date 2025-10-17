@@ -14,23 +14,17 @@ public final class SensingWorldState<T> implements WorldState {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensingWorldState.class);
 
-    private final T context;
-
-    private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
-
     private final Map<StateKey<?>, Object> stateMap;
 
-    public SensingWorldState(T context, Map<StateKey<?>, Sensor<? super T>> sensorMap) {
-        this(context, sensorMap, new HashMap<>());
+    private T context;
+
+    private Map<StateKey<?>, Sensor<? super T>> sensorMap;
+
+    public SensingWorldState() {
+        this(new HashMap<>());
     }
 
-    private SensingWorldState(
-        T context,
-        Map<StateKey<?>, Sensor<? super T>> sensorMap,
-        Map<StateKey<?>, Object> stateMap
-    ) {
-        this.context = context;
-        this.sensorMap = sensorMap;
+    private SensingWorldState(Map<StateKey<?>, Object> stateMap) {
         this.stateMap = stateMap;
     }
 
@@ -80,9 +74,20 @@ public final class SensingWorldState<T> implements WorldState {
         stateMap.clear();
     }
 
+    public void setSensorMap(Map<StateKey<?>, Sensor<? super T>> sensorMap) {
+        this.sensorMap = sensorMap;
+    }
+
+    public void setContext(T context) {
+        this.context = context;
+    }
+
     @Override
     public SensingWorldState<T> copy() {
-        return new SensingWorldState<>(context, sensorMap, new HashMap<>(stateMap));
+        var copy = new SensingWorldState<T>(new HashMap<>(stateMap));
+        copy.setContext(context);
+        copy.setSensorMap(sensorMap);
+        return copy;
     }
 
     @Override
@@ -91,5 +96,4 @@ public final class SensingWorldState<T> implements WorldState {
             "stateMap=" + getMap() +
             '}';
     }
-
 }
