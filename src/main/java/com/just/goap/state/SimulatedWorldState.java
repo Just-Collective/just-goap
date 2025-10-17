@@ -47,6 +47,11 @@ public class SimulatedWorldState<T> implements WorldState {
     }
 
     @Override
+    public void setAll(Map<StateKey<?>, Object> map) {
+        simulatedWorldState.setAll(map);
+    }
+
+    @Override
     public void apply(EffectContainer effectContainer) {
         for (var effect : effectContainer.getEffects()) {
             effect.apply(this);
