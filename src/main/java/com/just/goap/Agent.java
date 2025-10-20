@@ -22,18 +22,18 @@ public final class Agent<T> {
 
     private final WorldState previousWorldState;
 
-    private final SensingWorldState<T> currentWorldState;
-
     private @Nullable Plan<T> currentPlan;
 
+    private @Nullable SensingWorldState<T> currentWorldState;
 
     private long tick;
 
     private Agent(PlanFactory<T> planFactory) {
         this.planFactory = planFactory;
-        this.currentPlan = null;
         this.previousWorldState = WorldState.create();
-        this.currentWorldState = new SensingWorldState<>();
+
+        this.currentPlan = null;
+        this.currentWorldState = null;
         this.tick = 0;
     }
 
@@ -57,9 +57,13 @@ public final class Agent<T> {
     }
 
     private void prepareWorldStates(Graph<T> graph, T context) {
-        currentWorldState.setSensorMap(graph.getSensorMap());
-        currentWorldState.setContext(context);
+        if (currentWorldState == null || currentWorldState.getGraph() != graph) {
+            // Create a new world state if the current world state is null or the graph has changed.
+            this.currentWorldState = new SensingWorldState<>(graph, previousWorldState);
+        }
 
+        // Always update the context here.
+        currentWorldState.setContext(context);
         // Clear the previous world state.
         previousWorldState.clear();
         // Set the previous world state's contents to the current world state's contents.

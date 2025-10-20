@@ -8,24 +8,27 @@ import java.util.Map;
 
 import com.just.goap.StateKey;
 import com.just.goap.effect.EffectContainer;
-import com.just.goap.sensor.Sensor;
+import com.just.goap.graph.Graph;
 
 public final class SensingWorldState<T> implements WorldState {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensingWorldState.class);
 
+    private final Graph<T> graph;
+
+    private final ReadableWorldState previousWorldState;
+
+    private final Map<StateKey<?>, Object> retainedStateMap;
+
     private final Map<StateKey<?>, Object> stateMap;
 
     private T context;
 
-    private Map<StateKey<?>, Sensor<? super T>> sensorMap;
-
-    public SensingWorldState() {
-        this(new HashMap<>());
-    }
-
-    private SensingWorldState(Map<StateKey<?>, Object> stateMap) {
-        this.stateMap = stateMap;
+    public SensingWorldState(Graph<T> graph, ReadableWorldState previousWorldState) {
+        this.graph = graph;
+        this.previousWorldState = previousWorldState;
+        this.retainedStateMap = new HashMap<>();
+        this.stateMap = new HashMap<>();
     }
 
     @Override
@@ -33,15 +36,40 @@ public final class SensingWorldState<T> implements WorldState {
         @SuppressWarnings("unchecked")
         var value = (O) stateMap.get(key);
 
-        if (value == null) {
-            var sensor = sensorMap.get(key);
+        if (value != null) {
+            return value;
+        }
 
-            if (sensor != null) {
-                value = sensor.apply(key, context, this);
-                set(key, value);
+        @SuppressWarnings("unchecked")
+        var retained = (O) retainedStateMap.get(key);
+        var policy = graph.getRetentionPolicyMap().get(key);
+
+        if (retained != null && policy != null) {
+            boolean shouldRecompute = policy.shouldRecompute(
+                context,
+                previousWorldState,
+                this
+            );
+
+            if (!shouldRecompute) {
+                set(key, retained);
+                return retained;
             } else {
-                LOGGER.warn("Attempted to sense a value for key '{}', but no sensor exists for key '{}'.", key, key);
+                retainedStateMap.remove(key);
             }
+        }
+
+        var sensor = graph.getSensorMap().get(key);
+
+        if (sensor != null) {
+            value = sensor.apply(key, context, this);
+            set(key, value);
+
+            if (policy != null) {
+                retainedStateMap.put(key, value);
+            }
+        } else {
+            LOGGER.warn("Attempted to sense a value for key '{}', but no sensor exists for key '{}'.", key, key);
         }
 
         return value;
@@ -74,10 +102,6 @@ public final class SensingWorldState<T> implements WorldState {
         stateMap.clear();
     }
 
-    public void setSensorMap(Map<StateKey<?>, Sensor<? super T>> sensorMap) {
-        this.sensorMap = sensorMap;
-    }
-
     public void setContext(T context) {
         this.context = context;
     }
@@ -87,5 +111,9 @@ public final class SensingWorldState<T> implements WorldState {
         return "WorldState{" +
             "stateMap=" + getMap() +
             '}';
+    }
+
+    public Graph<T> getGraph() {
+        return graph;
     }
 }
