@@ -4,11 +4,11 @@ import org.jetbrains.annotations.Nullable;
 
 import com.just.goap.AOStar;
 import com.just.goap.graph.Graph;
-import com.just.goap.state.SensingWorldState;
+import com.just.goap.state.ReadableWorldState;
 
 public class DefaultPlanFactory {
 
-    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, SensingWorldState<T> worldState) {
+    public static <T> @Nullable Plan<T> create(Graph<T> graph, T context, ReadableWorldState worldState) {
         Plan<T> bestPlan = null;
         float bestCost = Float.MAX_VALUE;
 
