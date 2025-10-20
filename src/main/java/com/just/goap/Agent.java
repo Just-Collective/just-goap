@@ -26,17 +26,22 @@ public final class Agent<T> {
 
     private @Nullable Plan<T> currentPlan;
 
+
+    private long tick;
+
     private Agent(PlanFactory<T> planFactory) {
         this.planFactory = planFactory;
         this.currentPlan = null;
         this.previousWorldState = WorldState.create();
         this.currentWorldState = new SensingWorldState<>();
+        this.tick = 0;
     }
 
     public void update(Graph<T> graph, T context) {
         prepareWorldStates(graph, context);
         createPlan(graph, context);
         updatePlan(context);
+        tick++;
     }
 
     public void abandonPlan() {
@@ -45,6 +50,10 @@ public final class Agent<T> {
 
     public boolean hasPlan() {
         return currentPlan != null;
+    }
+
+    public long getTick() {
+        return tick;
     }
 
     private void prepareWorldStates(Graph<T> graph, T context) {
