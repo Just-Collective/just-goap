@@ -29,7 +29,7 @@ public final class AOStar {
         var open = new PriorityQueue<AOStarNode<T>>(F_COST_COMPARATOR);
 
         var rootUnsatisfied = desiredConditions.filterUnsatisfied(currentWorldState);
-        var rootState = new SimulatedWorldState<>(currentWorldState);
+        var rootState = new SimulatedWorldState(currentWorldState);
 
         LOGGER.trace("Start state: {}", currentWorldState);
         LOGGER.trace("Root unsatisfied conditions: {}", rootUnsatisfied.getConditions());
@@ -148,7 +148,7 @@ public final class AOStar {
     record AOStarNode<T>(
         ConditionContainer unsatisfiedConditions,
         List<Action<? super T>> planSoFar,
-        SimulatedWorldState<T> simulatedState,
+        SimulatedWorldState simulatedState,
         // cost so far.
         float gCost,
         // heuristic estimate.
@@ -160,7 +160,7 @@ public final class AOStar {
         AOStarNode(
             ConditionContainer unsatisfiedConditions,
             List<Action<? super T>> planSoFar,
-            SimulatedWorldState<T> simulatedState,
+            SimulatedWorldState simulatedState,
             float gCost,
             float hCost
         ) {

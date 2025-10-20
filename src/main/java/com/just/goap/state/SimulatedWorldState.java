@@ -8,15 +8,15 @@ import java.util.Map;
 import com.just.goap.StateKey;
 import com.just.goap.effect.EffectContainer;
 
-public class SimulatedWorldState<T> implements WorldState {
+public final class SimulatedWorldState implements WorldState {
 
     private final WorldState simulatedWorldState;
 
-    private final SensingWorldState<T> sensingWorldState;
+    private final ReadableWorldState backingWorldState;
 
-    public SimulatedWorldState(SensingWorldState<T> sensingWorldState) {
+    public SimulatedWorldState(ReadableWorldState backingWorldState) {
         this.simulatedWorldState = WorldState.create();
-        this.sensingWorldState = sensingWorldState;
+        this.backingWorldState = backingWorldState;
     }
 
     @Override
@@ -29,14 +29,14 @@ public class SimulatedWorldState<T> implements WorldState {
         }
 
         // Otherwise, delegate to sensing world state.
-        return sensingWorldState.getOrNull(key);
+        return backingWorldState.getOrNull(key);
     }
 
     @Override
     public Map<StateKey<?>, Object> getMap() {
         // Return a merged view (simulated overrides + sensed base).
         var merged = new HashMap<StateKey<?>, Object>();
-        merged.putAll(sensingWorldState.getMap());
+        merged.putAll(backingWorldState.getMap());
         merged.putAll(simulatedWorldState.getMap());
         return merged;
     }
@@ -63,9 +63,9 @@ public class SimulatedWorldState<T> implements WorldState {
         simulatedWorldState.clear();
     }
 
-    public SimulatedWorldState<T> copy() {
+    public SimulatedWorldState copy() {
         // Create a deep copy of the simulation layer, preserving the same sensing base.
-        var copy = new SimulatedWorldState<>(sensingWorldState);
+        var copy = new SimulatedWorldState(backingWorldState);
         copy.simulatedWorldState.getMap().putAll(simulatedWorldState.getMap());
         return copy;
     }
