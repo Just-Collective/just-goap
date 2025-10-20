@@ -241,7 +241,10 @@ class GraphValidator {
         Map<StateKey<?>, ?> retentionPolicyMap
     ) {
         // Map of key -> usages (for diagnostics)
-        record Usage(String type, String owner) {}
+        record Usage(
+            String type,
+            String owner
+        ) {}
 
         var keyUsages = new HashMap<StateKey<?>, Set<Usage>>();
 
@@ -256,10 +259,12 @@ class GraphValidator {
             }
 
             // Effects
-            action.getEffectContainer().getEffects().forEach(effect ->
-                keyUsages.computeIfAbsent(effect.key(), $ -> new HashSet<>())
-                    .add(new Usage("Action effect", actionName))
-            );
+            action.getEffectContainer()
+                .getEffects()
+                .forEach(
+                    effect -> keyUsages.computeIfAbsent(effect.key(), $ -> new HashSet<>())
+                        .add(new Usage("Action effect", actionName))
+                );
         }
 
         // 2. Collect from goals
@@ -267,16 +272,20 @@ class GraphValidator {
             var goalName = goal.toString();
 
             // Preconditions
-            goal.getPreconditions().getConditions().forEach(cond ->
-                keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
-                    .add(new Usage("Goal precondition", goalName))
-            );
+            goal.getPreconditions()
+                .getConditions()
+                .forEach(
+                    cond -> keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
+                        .add(new Usage("Goal precondition", goalName))
+                );
 
             // Desired conditions
-            goal.getDesiredConditions().getConditions().forEach(cond ->
-                keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
-                    .add(new Usage("Goal desired condition", goalName))
-            );
+            goal.getDesiredConditions()
+                .getConditions()
+                .forEach(
+                    cond -> keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
+                        .add(new Usage("Goal desired condition", goalName))
+                );
         }
 
         // 3. Now check for retention policy overlap
@@ -299,12 +308,12 @@ class GraphValidator {
 
             var errorMessage = String.format(
                 """
-                Retention policy found for key '%s', which is used in one or more planner-critical contexts:
-                    %s
-                    Possible fixes:
-                        - Remove the retention policy for '%s'
-                        - Modify the listed actions or goals to avoid using '%s' in those contexts
-                """,
+                    Retention policy found for key '%s', which is used in one or more planner-critical contexts:
+                        %s
+                        Possible fixes:
+                            - Remove the retention policy for '%s'
+                            - Modify the listed actions or goals to avoid using '%s' in those contexts
+                    """,
                 key,
                 joinedUsageDetails,
                 key,
@@ -314,7 +323,6 @@ class GraphValidator {
             validationErrorCollector.error(errorMessage);
         }
     }
-
 
     private GraphValidator() {
         throw new UnsupportedOperationException();
