@@ -14,6 +14,4 @@ public interface WritableWorldState {
     void apply(EffectContainer effectContainer);
 
     void clear();
-
-    WritableWorldState copy();
 }

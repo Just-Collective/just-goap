@@ -83,14 +83,6 @@ public final class SensingWorldState<T> implements WorldState {
     }
 
     @Override
-    public SensingWorldState<T> copy() {
-        var copy = new SensingWorldState<T>(new HashMap<>(stateMap));
-        copy.setContext(context);
-        copy.setSensorMap(sensorMap);
-        return copy;
-    }
-
-    @Override
     public String toString() {
         return "WorldState{" +
             "stateMap=" + getMap() +

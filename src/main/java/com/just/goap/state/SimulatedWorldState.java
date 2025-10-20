@@ -63,7 +63,6 @@ public class SimulatedWorldState<T> implements WorldState {
         simulatedWorldState.clear();
     }
 
-    @Override
     public SimulatedWorldState<T> copy() {
         // Create a deep copy of the simulation layer, preserving the same sensing base.
         var copy = new SimulatedWorldState<>(sensingWorldState);
