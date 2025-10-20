@@ -12,7 +12,6 @@ import java.util.PriorityQueue;
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.graph.Graph;
 import com.just.goap.state.ReadableWorldState;
-import com.just.goap.state.SensingWorldState;
 import com.just.goap.state.SimulatedWorldState;
 
 public final class AOStar {
@@ -24,7 +23,7 @@ public final class AOStar {
     public static <T> @Nullable List<Action<? super T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
-        SensingWorldState<T> currentWorldState,
+        ReadableWorldState currentWorldState,
         T context
     ) {
         var open = new PriorityQueue<AOStarNode<T>>(F_COST_COMPARATOR);
