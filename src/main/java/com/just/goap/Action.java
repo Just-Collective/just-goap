@@ -209,13 +209,21 @@ public class Action<T> {
 
     public static final class Context<T> {
 
+        private Agent<T> agent;
+
         private T context;
 
         private ReadableWorldState worldState;
 
+        private ReadableWorldState previousWorldState;
+
         private Blackboard blackboard;
 
         public Context() {}
+
+        public Agent<T> agent() {
+            return agent;
+        }
 
         public T context() {
             return context;
@@ -225,13 +233,25 @@ public class Action<T> {
             return worldState;
         }
 
+        public ReadableWorldState previousWorldState() {
+            return previousWorldState;
+        }
+
         public Blackboard blackboard() {
             return blackboard;
         }
 
-        public void set(T context, ReadableWorldState worldState, Blackboard blackboard) {
+        public void set(
+            Agent<T> agent,
+            T context,
+            ReadableWorldState worldState,
+            ReadableWorldState previousWorldState,
+            Blackboard blackboard
+        ) {
+            this.agent = agent;
             this.context = context;
             this.worldState = worldState;
+            this.previousWorldState = previousWorldState;
             this.blackboard = blackboard;
         }
     }

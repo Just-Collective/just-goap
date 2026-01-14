@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.just.core.functional.function.Lazy;
 import com.just.goap.Action;
+import com.just.goap.Agent;
 import com.just.goap.Goal;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
@@ -36,13 +37,13 @@ public class Plan<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public State update(T context, ReadableWorldState currentState) {
+    public State update(Agent<T> agent, T context, ReadableWorldState currentState, ReadableWorldState previousState) {
         if (getPlanState() == State.FINISHED) {
             return State.FINISHED;
         }
 
         // Update the reusable action context with current values.
-        actionContext.set(context, currentState, blackboard);
+        actionContext.set(agent, context, currentState, previousState, blackboard);
 
         var currentAction = (Action<T>) actions.get(currentActionIndex);
 

@@ -80,7 +80,7 @@ public final class Agent<T> {
 
     private void updatePlan(T context) {
         if (currentPlan != null) {
-            var planState = currentPlan.update(context, currentWorldState);
+            var planState = currentPlan.update(this, context, currentWorldState, previousWorldState);
 
             switch (planState) {
                 case ABORTED, FINISHED, INVALID -> this.currentPlan = null;
