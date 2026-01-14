@@ -13,7 +13,6 @@ import com.just.goap.Goal;
 import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
 import com.just.goap.sensor.Sensor;
-import com.just.goap.sensor.retention.RetentionPolicy;
 
 public class Graph<T> {
 
@@ -27,21 +26,17 @@ public class Graph<T> {
 
     private final Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap;
 
-    private final Map<StateKey<?>, RetentionPolicy<? super T, ?>> retentionPolicyMap;
-
     private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
     private Graph(
         Set<Action<? super T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap,
-        Map<StateKey<?>, RetentionPolicy<? super T, ?>> retentionPolicyMap,
         Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         this.availableActions = availableActions;
         this.availableGoals = availableGoals;
         this.preconditionToSatisfyingActionsMap = preconditionToSatisfyingActionsMap;
-        this.retentionPolicyMap = retentionPolicyMap;
         this.sensorMap = sensorMap;
     }
 
@@ -57,10 +52,6 @@ public class Graph<T> {
         return preconditionToSatisfyingActionsMap.getOrDefault(condition, Set.of());
     }
 
-    public Map<StateKey<?>, RetentionPolicy<? super T, ?>> getRetentionPolicyMap() {
-        return retentionPolicyMap;
-    }
-
     public Map<StateKey<?>, Sensor<? super T>> getSensorMap() {
         return sensorMap;
     }
@@ -73,21 +64,13 @@ public class Graph<T> {
 
         private final Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap;
 
-        private final Map<StateKey<?>, RetentionPolicy<? super T, ?>> retentionPolicyMap;
-
         private final Map<StateKey<?>, Sensor<? super T>> sensorMap;
 
         private Builder() {
             this.availableActions = new HashSet<>();
             this.availableGoals = new HashSet<>();
             this.preconditionToSatisfyingActionsMap = new HashMap<>();
-            this.retentionPolicyMap = new HashMap<>();
             this.sensorMap = new HashMap<>();
-        }
-
-        public Builder<T> addRetentionPolicy(RetentionPolicy<? super T, ?> retentionPolicy) {
-            retentionPolicyMap.put(retentionPolicy.key(), retentionPolicy);
-            return this;
         }
 
         public Builder<T> addSensors(Collection<? extends Sensor<? super T>> sensors) {
@@ -189,7 +172,6 @@ public class Graph<T> {
                 availableActions,
                 availableGoals,
                 preconditionToSatisfyingActionsMap,
-                retentionPolicyMap,
                 sensorMap
             );
 
@@ -197,7 +179,6 @@ public class Graph<T> {
                 Collections.unmodifiableSet(availableActions),
                 Collections.unmodifiableSet(availableGoals),
                 Collections.unmodifiableMap(preconditionToSatisfyingActionsMap),
-                Collections.unmodifiableMap(retentionPolicyMap),
                 Collections.unmodifiableMap(sensorMap)
             );
         }

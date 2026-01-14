@@ -23,7 +23,6 @@ class GraphValidator {
         Set<Action<? super T>> availableActions,
         Set<Goal> availableGoals,
         Map<Condition<?>, Set<Action<? super T>>> preconditionToSatisfyingActionsMap,
-        Map<StateKey<?>, ?> retentionPolicyMap,
         Map<StateKey<?>, Sensor<? super T>> sensorMap
     ) {
         var validationErrorCollector = new ValidationErrorCollector();
@@ -36,14 +35,6 @@ class GraphValidator {
         validateGoalReachabilityOrThrow(validationErrorCollector, availableGoals, preconditionToSatisfyingActionsMap);
         // Validate dead-end actions.
         validateActionContributionOrThrow(validationErrorCollector, availableActions, availableGoals);
-        // Validate retention policies to make sure they are not applied to state keys that are used as preconditions,
-        // desired conditions or action effects.
-        validateRetentionPolicyUsageOrThrow(
-            validationErrorCollector,
-            availableActions,
-            availableGoals,
-            retentionPolicyMap
-        );
 
         validationErrorCollector.flushAndThrowIfAny();
     }
@@ -231,96 +222,6 @@ class GraphValidator {
 
                 validationErrorCollector.error(errorMessage);
             }
-        }
-    }
-
-    private static <T> void validateRetentionPolicyUsageOrThrow(
-        ValidationErrorCollector validationErrorCollector,
-        Set<Action<? super T>> availableActions,
-        Set<Goal> availableGoals,
-        Map<StateKey<?>, ?> retentionPolicyMap
-    ) {
-        // Map of key -> usages (for diagnostics)
-        record Usage(
-            String type,
-            String owner
-        ) {}
-
-        var keyUsages = new HashMap<StateKey<?>, Set<Usage>>();
-
-        // 1. Collect from actions
-        for (var action : availableActions) {
-            var actionName = action.toString();
-
-            // Preconditions
-            for (var pre : action.getPreconditionContainer().getConditions()) {
-                keyUsages.computeIfAbsent(pre.key(), $ -> new HashSet<>())
-                    .add(new Usage("Action precondition", actionName));
-            }
-
-            // Effects
-            action.getEffectContainer()
-                .getEffects()
-                .forEach(
-                    effect -> keyUsages.computeIfAbsent(effect.key(), $ -> new HashSet<>())
-                        .add(new Usage("Action effect", actionName))
-                );
-        }
-
-        // 2. Collect from goals
-        for (var goal : availableGoals) {
-            var goalName = goal.toString();
-
-            // Preconditions
-            goal.getPreconditions()
-                .getConditions()
-                .forEach(
-                    cond -> keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
-                        .add(new Usage("Goal precondition", goalName))
-                );
-
-            // Desired conditions
-            goal.getDesiredConditions()
-                .getConditions()
-                .forEach(
-                    cond -> keyUsages.computeIfAbsent(cond.key(), $ -> new HashSet<>())
-                        .add(new Usage("Goal desired condition", goalName))
-                );
-        }
-
-        // 3. Now check for retention policy overlap
-        for (var entry : keyUsages.entrySet()) {
-            var key = entry.getKey();
-
-            if (!retentionPolicyMap.containsKey(key)) {
-                continue;
-            }
-
-            var usages = entry.getValue();
-
-            // Build a human-readable description of all usages.
-            var usageDetails = usages.stream()
-                .map(u -> String.format("- %s in '%s'", u.type(), u.owner()))
-                .sorted()
-                .toList();
-
-            var joinedUsageDetails = String.join("\n\t", usageDetails);
-
-            var errorMessage = String.format(
-                """
-                    Retention policy found for key '%s', which is used in one or more planner-critical contexts:
-                        %s
-                        Possible fixes:
-                            - Remove the retention policy for '%s'
-                            - Modify the listed actions or goals to avoid using '%s' in those contexts
-                    """,
-                key,
-                joinedUsageDetails,
-                key,
-                key
-            );
-
-            validationErrorCollector.error(errorMessage);
         }
     }
 

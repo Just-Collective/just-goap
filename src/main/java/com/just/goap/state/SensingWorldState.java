@@ -16,18 +16,12 @@ public final class SensingWorldState<T> implements WorldState {
 
     private final Graph<T> graph;
 
-    private final ReadableWorldState previousWorldState;
-
-    private final Map<StateKey<?>, Object> retainedStateMap;
-
     private final Map<StateKey<?>, Object> stateMap;
 
     private T context;
 
-    public SensingWorldState(Graph<T> graph, ReadableWorldState previousWorldState) {
+    public SensingWorldState(Graph<T> graph) {
         this.graph = graph;
-        this.previousWorldState = previousWorldState;
-        this.retainedStateMap = new HashMap<>();
         this.stateMap = new HashMap<>();
     }
 
@@ -36,40 +30,15 @@ public final class SensingWorldState<T> implements WorldState {
         @SuppressWarnings("unchecked")
         var value = (O) stateMap.get(key);
 
-        if (value != null) {
-            return value;
-        }
+        if (value == null) {
+            var sensor = graph.getSensorMap().get(key);
 
-        @SuppressWarnings("unchecked")
-        var retained = (O) retainedStateMap.get(key);
-        var policy = graph.getRetentionPolicyMap().get(key);
-
-        if (retained != null && policy != null) {
-            boolean shouldRecompute = policy.shouldRecompute(
-                context,
-                previousWorldState,
-                this
-            );
-
-            if (!shouldRecompute) {
-                set(key, retained);
-                return retained;
+            if (sensor != null) {
+                value = sensor.apply(key, context, this);
+                set(key, value);
             } else {
-                retainedStateMap.remove(key);
+                LOGGER.warn("Attempted to sense a value for key '{}', but no sensor exists for key '{}'.", key, key);
             }
-        }
-
-        var sensor = graph.getSensorMap().get(key);
-
-        if (sensor != null) {
-            value = sensor.apply(key, context, this);
-            set(key, value);
-
-            if (policy != null) {
-                retainedStateMap.put(key, value);
-            }
-        } else {
-            LOGGER.warn("Attempted to sense a value for key '{}', but no sensor exists for key '{}'.", key, key);
         }
 
         return value;

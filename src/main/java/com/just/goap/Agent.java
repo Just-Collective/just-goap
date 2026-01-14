@@ -59,7 +59,7 @@ public final class Agent<T> {
     private void prepareWorldStates(Graph<T> graph, T context) {
         if (currentWorldState == null || currentWorldState.getGraph() != graph) {
             // Create a new world state if the current world state is null or the graph has changed.
-            this.currentWorldState = new SensingWorldState<>(graph, previousWorldState);
+            this.currentWorldState = new SensingWorldState<>(graph);
         }
 
         // Always update the context here.
