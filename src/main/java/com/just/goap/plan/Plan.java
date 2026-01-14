@@ -17,6 +17,8 @@ public class Plan<T> {
 
     private final Blackboard blackboard;
 
+    private final Action.Context<T> actionContext;
+
     private final Lazy<String> actionsString;
 
     private int currentActionIndex;
@@ -27,22 +29,27 @@ public class Plan<T> {
         this.goal = goal;
         this.actions = actions;
         this.blackboard = new Blackboard();
+        this.actionContext = new Action.Context<>();
         this.actionsString = Lazy.of(() -> actions.stream().map(Action::getName).collect(Collectors.joining(", ")));
         this.currentActionIndex = 0;
         this.currentActionTick = 0;
     }
 
+    @SuppressWarnings("unchecked")
     public State update(T context, ReadableWorldState currentState) {
         if (getPlanState() == State.FINISHED) {
             return State.FINISHED;
         }
 
-        var currentAction = actions.get(currentActionIndex);
+        // Update the reusable action context with current values.
+        actionContext.set(context, currentState, blackboard);
+
+        var currentAction = (Action<T>) actions.get(currentActionIndex);
 
         // If the world state already satisfies the effects of the action...
         if (currentState.satisfies(currentAction.getEffectContainer())) {
             // Then the action can be considered complete, move on to the next action or finish.
-            currentAction.onFinish(context, currentState, blackboard);
+            currentAction.onFinish(actionContext);
             // Move current action index forward.
             proceedToNextAction();
 
@@ -53,22 +60,22 @@ public class Plan<T> {
             }
 
             // Re-assign the current action reference before we run the next action.
-            currentAction = actions.get(currentActionIndex);
+            currentAction = (Action<T>) actions.get(currentActionIndex);
         }
 
         // Always check the current action's preconditions before running the action.
         if (!currentAction.getPreconditionContainer().satisfiedBy(currentState)) {
-            currentAction.onFinish(context, currentState, blackboard);
+            currentAction.onFinish(actionContext);
             return State.INVALID;
         }
 
         if (currentActionTick == 0) {
             // Trigger onStart callback for the action if the current tick is the first tick.
-            currentAction.onStart(context, currentState, blackboard);
+            currentAction.onStart(actionContext);
         }
 
         // Run the action.
-        var signal = currentAction.perform(context, currentState, blackboard);
+        var signal = currentAction.perform(actionContext);
 
         // Increment the current action tick after performing the action.
         currentActionTick++;

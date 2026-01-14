@@ -55,16 +55,16 @@ public class Action<T> {
         return costCallback.apply(context, worldState);
     }
 
-    public Signal perform(T context, ReadableWorldState worldState, Blackboard blackboard) {
-        return performCallback.accept(context, worldState, blackboard);
+    public Signal perform(Context<T> context) {
+        return performCallback.accept(context);
     }
 
-    public void onStart(T context, ReadableWorldState worldState, Blackboard blackboard) {
-        startCallback.apply(context, worldState, blackboard);
+    public void onStart(Context<T> context) {
+        startCallback.apply(context);
     }
 
-    public void onFinish(T context, ReadableWorldState worldState, Blackboard blackboard) {
-        finishCallback.apply(context, worldState, blackboard);
+    public void onFinish(Context<T> context) {
+        finishCallback.apply(context);
     }
 
     public ConditionContainer getPreconditionContainer() {
@@ -105,9 +105,9 @@ public class Action<T> {
             this.effects = new ArrayList<>();
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
-            this.startCallback = ($1, $2, $3) -> {};
-            this.performCallback = ($1, $2, $3) -> Signal.CONTINUE;
-            this.finishCallback = ($1, $2, $3) -> {};
+            this.startCallback = $ -> {};
+            this.performCallback = $ -> Signal.CONTINUE;
+            this.finishCallback = $ -> {};
         }
 
         public <U> Builder<T> addPrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
@@ -192,18 +192,47 @@ public class Action<T> {
     @FunctionalInterface
     public interface StartCallback<T> {
 
-        void apply(T context, ReadableWorldState worldState, Blackboard blackboard);
+        void apply(Context<T> context);
     }
 
     @FunctionalInterface
     public interface PerformCallback<T> {
 
-        Signal accept(T context, ReadableWorldState worldState, Blackboard blackboard);
+        Signal accept(Context<T> context);
     }
 
     @FunctionalInterface
     public interface FinishCallback<T> {
 
-        void apply(T context, ReadableWorldState worldState, Blackboard blackboard);
+        void apply(Context<T> context);
+    }
+
+    public static final class Context<T> {
+
+        private T context;
+
+        private ReadableWorldState worldState;
+
+        private Blackboard blackboard;
+
+        public Context() {}
+
+        public T context() {
+            return context;
+        }
+
+        public ReadableWorldState worldState() {
+            return worldState;
+        }
+
+        public Blackboard blackboard() {
+            return blackboard;
+        }
+
+        public void set(T context, ReadableWorldState worldState, Blackboard blackboard) {
+            this.context = context;
+            this.worldState = worldState;
+            this.blackboard = blackboard;
+        }
     }
 }
