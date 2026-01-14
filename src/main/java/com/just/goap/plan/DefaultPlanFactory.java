@@ -5,24 +5,35 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.just.goap.AOStar;
+import com.just.goap.Agent;
 import com.just.goap.graph.Graph;
 import com.just.goap.state.ReadableWorldState;
 
 public class DefaultPlanFactory {
 
-    public static <T> List<Plan<T>> create(Graph<T> graph, T context, ReadableWorldState worldState) {
+    public static <T> List<Plan<T>> create(
+        Graph<T> graph,
+        T context,
+        ReadableWorldState worldState,
+        Agent.Debugger debugger
+    ) {
         var plans = new ArrayList<PlanWithCost<T>>();
 
         for (var goal : graph.getAvailableGoals()) {
-            if (!goal.getPreconditions().satisfiedBy(worldState)) {
-                // Goal's preconditions are not satisfied by the current world state, skip the goal.
+            debugger.push("Goal '" + goal.getName() + "' precondition check");
+            var preconditionsSatisfied = goal.getPreconditions().satisfiedBy(worldState);
+            debugger.pop();
+
+            if (!preconditionsSatisfied) {
                 continue;
             }
 
             // We need to find actions that satisfy these conditions.
             var desiredConditions = goal.getDesiredConditions();
 
+            debugger.push("AOStar.solve() for goal '" + goal.getName() + "'");
             var actions = AOStar.solve(graph, desiredConditions, worldState, context);
+            debugger.pop();
 
             if (actions != null && !actions.isEmpty()) {
                 // FIXME: The cost-per-action here is evaluated using the wrong world state. We need to use the

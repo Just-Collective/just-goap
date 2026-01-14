@@ -70,13 +70,19 @@ public class Plan<T> {
             return State.INVALID;
         }
 
+        var debugger = agent.debugger();
+
         if (currentActionTick == 0) {
             // Trigger onStart callback for the action if the current tick is the first tick.
+            debugger.push("Action '" + currentAction.getName() + "' onStart()");
             currentAction.onStart(actionContext);
+            debugger.pop();
         }
 
         // Run the action.
+        debugger.push("Action '" + currentAction.getName() + "' perform()");
         var signal = currentAction.perform(actionContext);
+        debugger.pop();
 
         // Increment the current action tick after performing the action.
         currentActionTick++;

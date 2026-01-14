@@ -1,7 +1,10 @@
 package com.just.goap;
 
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import com.just.goap.graph.Graph;
@@ -24,6 +27,8 @@ public final class Agent<T> {
 
     private final WorldState previousWorldState;
 
+    private final Debugger debugger;
+
     private @Nullable Plan<T> currentPlan;
 
     private @Nullable SensingWorldState<T> currentWorldState;
@@ -33,6 +38,7 @@ public final class Agent<T> {
     private Agent(PlanFactory<T> planFactory) {
         this.planFactory = planFactory;
         this.previousWorldState = WorldState.create();
+        this.debugger = new Debugger(this);
 
         this.currentPlan = null;
         this.currentWorldState = null;
@@ -40,10 +46,14 @@ public final class Agent<T> {
     }
 
     public void update(Graph<T> graph, T context) {
+        debugger.push("Agent.update()");
+
         prepareWorldStates(graph, context);
         createPlan(graph, context);
         updatePlan(context);
         tick++;
+
+        debugger.pop();
     }
 
     public void abandonPlan() {
@@ -56,6 +66,10 @@ public final class Agent<T> {
 
     public long getTick() {
         return tick;
+    }
+
+    public Debugger debugger() {
+        return debugger;
     }
 
     private void prepareWorldStates(Graph<T> graph, T context) {
@@ -76,17 +90,25 @@ public final class Agent<T> {
 
     private void createPlan(Graph<T> graph, T context) {
         if (currentPlan == null) {
-            var plans = planFactory.create(graph, context, currentWorldState);
+            debugger.push("Agent.createPlan()");
+
+            var plans = planFactory.create(graph, context, currentWorldState, debugger);
 
             if (!plans.isEmpty()) {
                 this.currentPlan = plans.getFirst();
             }
+
+            debugger.pop();
         }
     }
 
     private void updatePlan(T context) {
         if (currentPlan != null) {
+            debugger.push("Agent.updatePlan()");
+
             var planState = currentPlan.update(this, context, currentWorldState, previousWorldState);
+
+            debugger.pop();
 
             switch (planState) {
                 case ABORTED, FINISHED, INVALID -> this.currentPlan = null;
@@ -97,7 +119,7 @@ public final class Agent<T> {
 
     public interface PlanFactory<T> {
 
-        List<Plan<T>> create(Graph<T> graph, T context, SensingWorldState<T> worldState);
+        List<Plan<T>> create(Graph<T> graph, T context, SensingWorldState<T> worldState, Debugger debugger);
     }
 
     public static class Builder<T> {
@@ -116,5 +138,60 @@ public final class Agent<T> {
         public Agent<T> build() {
             return new Agent<>(planFactory);
         }
+    }
+
+    public static final class Debugger {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(Debugger.class);
+
+        private final Agent<?> agent;
+
+        private final ArrayDeque<Frame> frameStack;
+
+        private boolean enabled;
+
+        public Debugger(Agent<?> agent) {
+            this.agent = agent;
+            this.frameStack = new ArrayDeque<>();
+            this.enabled = false;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public void push(String name) {
+            if (!isEnabled()) {
+                return;
+            }
+
+            frameStack.push(new Frame(name, System.nanoTime()));
+        }
+
+        public void pop() {
+            if (!isEnabled()) {
+                return;
+            }
+
+            if (frameStack.isEmpty()) {
+                return;
+            }
+
+            var frame = frameStack.pop();
+            var timeMs = (System.nanoTime() - frame.startTime) / 1_000_000.0;
+
+            if (enabled) {
+                LOGGER.debug("T={}, {} completed in {}ms", agent.getTick(), frame.name, timeMs);
+            }
+        }
+
+        private record Frame(
+            String name,
+            long startTime
+        ) {}
     }
 }
