@@ -2,6 +2,8 @@ package com.just.goap;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
@@ -74,7 +76,11 @@ public final class Agent<T> {
 
     private void createPlan(Graph<T> graph, T context) {
         if (currentPlan == null) {
-            this.currentPlan = planFactory.create(graph, context, currentWorldState);
+            var plans = planFactory.create(graph, context, currentWorldState);
+
+            if (!plans.isEmpty()) {
+                this.currentPlan = plans.getFirst();
+            }
         }
     }
 
@@ -91,8 +97,7 @@ public final class Agent<T> {
 
     public interface PlanFactory<T> {
 
-        @Nullable
-        Plan<T> create(Graph<T> graph, T context, SensingWorldState<T> worldState);
+        List<Plan<T>> create(Graph<T> graph, T context, SensingWorldState<T> worldState);
     }
 
     public static class Builder<T> {
