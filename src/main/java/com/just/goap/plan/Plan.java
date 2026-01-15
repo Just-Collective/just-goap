@@ -93,6 +93,10 @@ public class Plan<T> {
         };
     }
 
+    public int getCurrentActionTick() {
+        return currentActionTick;
+    }
+
     private void proceedToNextAction() {
         // Move to the next action index.
         this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size());
