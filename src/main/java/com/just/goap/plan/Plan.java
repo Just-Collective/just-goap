@@ -32,10 +32,14 @@ public class Plan<T> {
 
     public Plan(Goal goal, List<Action<? super T>> actions) {
         this.goal = goal;
-        this.actions = actions;
+        this.actions = Collections.unmodifiableList(actions);
         this.actionBlackboard = new Blackboard();
         this.actionContext = new Action.Context<>();
-        this.actionsString = Lazy.of(() -> actions.stream().map(Action::getName).collect(Collectors.joining(", ")));
+        this.actionsString = Lazy.of(
+            () -> actions.stream()
+                .map(Action::getName)
+                .collect(Collectors.joining(", "))
+        );
         this.blackboard = new Blackboard();
         this.currentActionIndex = 0;
         this.actionTick = 0;
