@@ -48,7 +48,7 @@ public class DefaultPlanFactory {
         }
 
         // Sort by cost (lowest first) and extract plans.
-        plans.sort(Comparator.comparingDouble(p -> p.cost));
+        plans.sort(Comparator.comparingDouble(planWithCost -> planWithCost.cost));
 
         var result = new ArrayList<Plan<T>>(plans.size());
 
