@@ -83,7 +83,7 @@ public final class Agent<T> {
         return tick;
     }
 
-    public Debugger debugger() {
+    public Debugger getDebugger() {
         return debugger;
     }
 
