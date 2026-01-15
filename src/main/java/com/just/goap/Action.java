@@ -10,6 +10,7 @@ import com.just.goap.condition.ConditionContainer;
 import com.just.goap.condition.expression.Expression;
 import com.just.goap.effect.Effect;
 import com.just.goap.effect.EffectContainer;
+import com.just.goap.plan.Plan;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
 
@@ -209,9 +210,13 @@ public class Action<T> {
 
     public static final class Context<T> {
 
-        private Agent<T> agent;
+        private Action<T> action;
 
         private T actor;
+
+        private Agent<T> agent;
+
+        private Plan<T> plan;
 
         private ReadableWorldState worldState;
 
@@ -221,12 +226,20 @@ public class Action<T> {
 
         public Context() {}
 
-        public Agent<T> agent() {
-            return agent;
+        public Action<T> action() {
+            return action;
         }
 
         public T actor() {
             return actor;
+        }
+
+        public Agent<T> agent() {
+            return agent;
+        }
+
+        public Plan<T> plan() {
+            return plan;
         }
 
         public ReadableWorldState worldState() {
@@ -242,14 +255,18 @@ public class Action<T> {
         }
 
         public void set(
-            Agent<T> agent,
+            Action<T> action,
             T actor,
+            Agent<T> agent,
+            Plan<T> plan,
             ReadableWorldState worldState,
             ReadableWorldState previousWorldState,
             Blackboard blackboard
         ) {
-            this.agent = agent;
+            this.action = action;
             this.actor = actor;
+            this.agent = agent;
+            this.plan = plan;
             this.worldState = worldState;
             this.previousWorldState = previousWorldState;
             this.blackboard = blackboard;

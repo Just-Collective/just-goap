@@ -42,10 +42,10 @@ public class Plan<T> {
             return State.FINISHED;
         }
 
-        // Update the reusable action context with current values.
-        actionContext.set(agent, actor, currentState, previousState, blackboard);
-
         var currentAction = (Action<T>) actions.get(currentActionIndex);
+
+        // Update the reusable action context with current values.
+        actionContext.set(currentAction, actor, agent, this, currentState, previousState, blackboard);
 
         // If the world state already satisfies the effects of the action...
         if (currentState.satisfies(currentAction.getEffectContainer())) {
