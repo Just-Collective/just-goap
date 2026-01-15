@@ -35,4 +35,8 @@ public class Blackboard {
     public <T> void set(StateKey<T> key, T value) {
         stateMap.put(key, value);
     }
+
+    public void clear() {
+        stateMap.clear();
+    }
 }
