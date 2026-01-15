@@ -39,4 +39,11 @@ public class Blackboard {
     public void clear() {
         stateMap.clear();
     }
+
+    public enum Scope {
+        ACTION,
+        AGENT,
+        GRAPH,
+        PLAN
+    }
 }
