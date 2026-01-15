@@ -18,7 +18,7 @@ public final class SensingWorldState<T> implements WorldState {
 
     private final Map<StateKey<?>, Object> stateMap;
 
-    private T context;
+    private T actor;
 
     public SensingWorldState(Graph<T> graph) {
         this.graph = graph;
@@ -34,7 +34,7 @@ public final class SensingWorldState<T> implements WorldState {
             var sensor = graph.getSensorMap().get(key);
 
             if (sensor != null) {
-                value = sensor.apply(key, context, this);
+                value = sensor.apply(key, actor, this);
                 set(key, value);
             } else {
                 LOGGER.warn("Attempted to sense a value for key '{}', but no sensor exists for key '{}'.", key, key);
@@ -71,8 +71,8 @@ public final class SensingWorldState<T> implements WorldState {
         stateMap.clear();
     }
 
-    public void setContext(T context) {
-        this.context = context;
+    public void setActor(T actor) {
+        this.actor = actor;
     }
 
     @Override

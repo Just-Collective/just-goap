@@ -9,7 +9,7 @@ public interface Sensor<T> {
 
     Set<StateKey.Sensed<?>> outputKeys();
 
-    <V> V apply(StateKey<V> key, T context, ReadableWorldState worldState);
+    <V> V apply(StateKey<V> key, T actor, ReadableWorldState worldState);
 
     interface Mono<T, O> extends Sensor<T> {
 

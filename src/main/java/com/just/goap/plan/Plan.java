@@ -37,13 +37,13 @@ public class Plan<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public State update(Agent<T> agent, T context, ReadableWorldState currentState, ReadableWorldState previousState) {
+    public State update(Agent<T> agent, T actor, ReadableWorldState currentState, ReadableWorldState previousState) {
         if (getPlanState() == State.FINISHED) {
             return State.FINISHED;
         }
 
         // Update the reusable action context with current values.
-        actionContext.set(agent, context, currentState, previousState, blackboard);
+        actionContext.set(agent, actor, currentState, previousState, blackboard);
 
         var currentAction = (Action<T>) actions.get(currentActionIndex);
 

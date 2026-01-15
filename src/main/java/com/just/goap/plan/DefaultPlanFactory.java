@@ -13,7 +13,7 @@ public class DefaultPlanFactory {
 
     public static <T> List<Plan<T>> create(
         Graph<T> graph,
-        T context,
+        T actor,
         ReadableWorldState worldState,
         Agent.Debugger debugger
     ) {
@@ -32,7 +32,7 @@ public class DefaultPlanFactory {
             var desiredConditions = goal.getDesiredConditions();
 
             debugger.push("AOStar.solve() for goal '" + goal.getName() + "'");
-            var actions = AOStar.solve(graph, desiredConditions, worldState, context);
+            var actions = AOStar.solve(graph, desiredConditions, worldState, actor);
             debugger.pop();
 
             if (actions != null && !actions.isEmpty()) {
@@ -40,7 +40,7 @@ public class DefaultPlanFactory {
                 // simulated state.
                 var cost = 0.0f;
                 for (var action : actions) {
-                    cost += action.getCost(context, worldState);
+                    cost += action.getCost(actor, worldState);
                 }
 
                 plans.add(new PlanWithCost<>(new Plan<>(goal, actions), cost));

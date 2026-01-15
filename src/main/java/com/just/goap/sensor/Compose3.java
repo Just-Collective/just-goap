@@ -37,10 +37,10 @@ public final class Compose3<T, I1, I2, I3, O1> implements Sensor.Mono<T, O1> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> V apply(StateKey<V> key, T context, ReadableWorldState worldState) {
+    public <V> V apply(StateKey<V> key, T actor, ReadableWorldState worldState) {
         var sourceValueA = worldState.getOrNull(sourceKeyA);
         var sourceValueB = worldState.getOrNull(sourceKeyB);
         var sourceValueC = worldState.getOrNull(sourceKeyC);
-        return (V) extractor.apply(context, sourceValueA, sourceValueB, sourceValueC);
+        return (V) extractor.apply(actor, sourceValueA, sourceValueB, sourceValueC);
     }
 }

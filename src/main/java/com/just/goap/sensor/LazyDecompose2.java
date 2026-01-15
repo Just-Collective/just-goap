@@ -31,7 +31,7 @@ public final class LazyDecompose2<T, O1, O2> implements Sensor.Multi<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> V apply(StateKey<V> key, T context, ReadableWorldState worldState) {
-        return (V) extractor.apply(context, worldState).get(key);
+    public <V> V apply(StateKey<V> key, T actor, ReadableWorldState worldState) {
+        return (V) extractor.apply(actor, worldState).get(key);
     }
 }

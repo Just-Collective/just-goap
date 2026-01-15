@@ -38,9 +38,9 @@ public final class Map2To2<T, I1, I2, O1, O2> implements Sensor.Multi<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public <V> V apply(StateKey<V> key, T context, ReadableWorldState worldState) {
+    public <V> V apply(StateKey<V> key, T actor, ReadableWorldState worldState) {
         var sourceValueA = worldState.getOrNull(sourceKeyA);
         var sourceValueB = worldState.getOrNull(sourceKeyB);
-        return (V) extractor.apply(context, sourceValueA, sourceValueB).get(key);
+        return (V) extractor.apply(actor, sourceValueA, sourceValueB).get(key);
     }
 }

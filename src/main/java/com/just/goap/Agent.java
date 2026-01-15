@@ -45,12 +45,12 @@ public final class Agent<T> {
         this.tick = 0;
     }
 
-    public void update(Graph<T> graph, T context) {
+    public void update(Graph<T> graph, T actor) {
         debugger.push("Agent.update()");
 
-        prepareWorldStates(graph, context);
-        createPlan(graph, context);
-        updatePlan(context);
+        prepareWorldStates(graph, actor);
+        createPlan(graph, actor);
+        updatePlan(actor);
         tick++;
 
         debugger.pop();
@@ -72,14 +72,14 @@ public final class Agent<T> {
         return debugger;
     }
 
-    private void prepareWorldStates(Graph<T> graph, T context) {
+    private void prepareWorldStates(Graph<T> graph, T actor) {
         if (currentWorldState == null || currentWorldState.getGraph() != graph) {
             // Create a new world state if the current world state is null or the graph has changed.
             this.currentWorldState = new SensingWorldState<>(graph);
         }
 
-        // Always update the context here.
-        currentWorldState.setContext(context);
+        // Always update the actor here.
+        currentWorldState.setActor(actor);
         // Clear the previous world state.
         previousWorldState.clear();
         // Set the previous world state's contents to the current world state's contents.
@@ -88,11 +88,11 @@ public final class Agent<T> {
         currentWorldState.clear();
     }
 
-    private void createPlan(Graph<T> graph, T context) {
+    private void createPlan(Graph<T> graph, T actor) {
         if (currentPlan == null) {
             debugger.push("Agent.createPlan()");
 
-            var plans = planFactory.create(graph, context, currentWorldState, debugger);
+            var plans = planFactory.create(graph, actor, currentWorldState, debugger);
 
             if (!plans.isEmpty()) {
                 this.currentPlan = plans.getFirst();
@@ -102,11 +102,11 @@ public final class Agent<T> {
         }
     }
 
-    private void updatePlan(T context) {
+    private void updatePlan(T actor) {
         if (currentPlan != null) {
             debugger.push("Agent.updatePlan()");
 
-            var planState = currentPlan.update(this, context, currentWorldState, previousWorldState);
+            var planState = currentPlan.update(this, actor, currentWorldState, previousWorldState);
 
             debugger.pop();
 
@@ -119,7 +119,7 @@ public final class Agent<T> {
 
     public interface PlanFactory<T> {
 
-        List<Plan<T>> create(Graph<T> graph, T context, SensingWorldState<T> worldState, Debugger debugger);
+        List<Plan<T>> create(Graph<T> graph, T actor, SensingWorldState<T> worldState, Debugger debugger);
     }
 
     public static class Builder<T> {

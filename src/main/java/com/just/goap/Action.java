@@ -51,8 +51,8 @@ public class Action<T> {
         this.finishCallback = finishCallback;
     }
 
-    public float getCost(T context, ReadableWorldState worldState) {
-        return costCallback.apply(context, worldState);
+    public float getCost(T actor, ReadableWorldState worldState) {
+        return costCallback.apply(actor, worldState);
     }
 
     public Signal perform(Context<T> context) {
@@ -186,7 +186,7 @@ public class Action<T> {
     @FunctionalInterface
     public interface CostCallback<T> {
 
-        float apply(T context, ReadableWorldState worldState);
+        float apply(T actor, ReadableWorldState worldState);
     }
 
     @FunctionalInterface
@@ -211,7 +211,7 @@ public class Action<T> {
 
         private Agent<T> agent;
 
-        private T context;
+        private T actor;
 
         private ReadableWorldState worldState;
 
@@ -225,8 +225,8 @@ public class Action<T> {
             return agent;
         }
 
-        public T context() {
-            return context;
+        public T actor() {
+            return actor;
         }
 
         public ReadableWorldState worldState() {
@@ -243,13 +243,13 @@ public class Action<T> {
 
         public void set(
             Agent<T> agent,
-            T context,
+            T actor,
             ReadableWorldState worldState,
             ReadableWorldState previousWorldState,
             Blackboard blackboard
         ) {
             this.agent = agent;
-            this.context = context;
+            this.actor = actor;
             this.worldState = worldState;
             this.previousWorldState = previousWorldState;
             this.blackboard = blackboard;

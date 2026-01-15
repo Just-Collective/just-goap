@@ -27,7 +27,7 @@ public final class LazyCompose<T, O1> implements Sensor.Mono<T, O1> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> V apply(StateKey<V> key, T context, ReadableWorldState worldState) {
-        return (V) extractor.apply(context, worldState).get(key);
+    public <V> V apply(StateKey<V> key, T actor, ReadableWorldState worldState) {
+        return (V) extractor.apply(actor, worldState).get(key);
     }
 }

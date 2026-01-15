@@ -43,8 +43,8 @@ public class Sensors {
         StateKey.Sensed<O2> outputKeyB,
         Function<? super T, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new Decompose2<T, O1, O2>(outputKeyA, outputKeyB, context -> {
-            var tuple = extractor.apply(context);
+        return new Decompose2<T, O1, O2>(outputKeyA, outputKeyB, actor -> {
+            var tuple = extractor.apply(actor);
             return java.util.Map.of(
                 outputKeyA,
                 tuple.v1(),
@@ -60,8 +60,8 @@ public class Sensors {
         StateKey.Sensed<O3> outputKeyC,
         Function<? super T, ? extends Tuple3<O1, O2, O3>> extractor
     ) {
-        return new Decompose3<T, O1, O2, O3>(outputKeyA, outputKeyB, outputKeyC, context -> {
-            var tuple = extractor.apply(context);
+        return new Decompose3<T, O1, O2, O3>(outputKeyA, outputKeyB, outputKeyC, actor -> {
+            var tuple = extractor.apply(actor);
             return java.util.Map.of(
                 outputKeyA,
                 tuple.v1(),
@@ -77,8 +77,8 @@ public class Sensors {
         StateKey.Sensed<O1> outputKeyA,
         Function2<? super T, ? super ReadableWorldState, ? extends O1> extractor
     ) {
-        return new LazyCompose<T, O1>(outputKeyA, (context, worldState) -> {
-            var value = extractor.apply(context, worldState);
+        return new LazyCompose<T, O1>(outputKeyA, (actor, worldState) -> {
+            var value = extractor.apply(actor, worldState);
             return java.util.Map.of(outputKeyA, value);
         });
     }
@@ -88,8 +88,8 @@ public class Sensors {
         StateKey.Sensed<O2> outputKeyB,
         Function2<? super T, ? super ReadableWorldState, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new LazyDecompose2<T, O1, O2>(outputKeyA, outputKeyB, (context, worldState) -> {
-            var tuple = extractor.apply(context, worldState);
+        return new LazyDecompose2<T, O1, O2>(outputKeyA, outputKeyB, (actor, worldState) -> {
+            var tuple = extractor.apply(actor, worldState);
             return java.util.Map.of(
                 outputKeyA,
                 tuple.v1(),
@@ -112,8 +112,8 @@ public class Sensors {
         StateKey.Sensed<O2> outputKeyB,
         Function2<? super T, ? super I1, ? extends Tuple2<O1, O2>> extractor
     ) {
-        return new Map1To2<T, I1, O1, O2>(sourceKeyA, outputKeyA, outputKeyB, (context, sourceA) -> {
-            var tuple = extractor.apply(context, sourceA);
+        return new Map1To2<T, I1, O1, O2>(sourceKeyA, outputKeyA, outputKeyB, (actor, sourceA) -> {
+            var tuple = extractor.apply(actor, sourceA);
             return java.util.Map.of(
                 outputKeyA,
                 tuple.v1(),
@@ -135,8 +135,8 @@ public class Sensors {
             sourceKeyB,
             outputKeyA,
             outputKeyB,
-            (context, sourceA, sourceB) -> {
-                var tuple = extractor.apply(context, sourceA, sourceB);
+            (actor, sourceA, sourceB) -> {
+                var tuple = extractor.apply(actor, sourceA, sourceB);
                 return java.util.Map.of(
                     outputKeyA,
                     tuple.v1(),

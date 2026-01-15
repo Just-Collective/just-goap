@@ -24,7 +24,7 @@ public final class AOStar {
         Graph<T> graph,
         ConditionContainer desiredConditions,
         ReadableWorldState currentWorldState,
-        T context
+        T actor
     ) {
         var open = new PriorityQueue<AOStarNode<T>>(F_COST_COMPARATOR);
 
@@ -40,7 +40,7 @@ public final class AOStar {
                 new ArrayList<>(),
                 rootState,
                 0.0f,
-                heuristic(rootUnsatisfied, graph, context, currentWorldState)
+                heuristic(rootUnsatisfied, graph, actor, currentWorldState)
             )
         );
 
@@ -92,11 +92,11 @@ public final class AOStar {
                     newPlan.add(action);
 
                     // Costs.
-                    var g = node.gCost + action.getCost(context, node.simulatedState);
-                    var h = heuristic(newUnsatisfied, graph, context, node.simulatedState);
+                    var g = node.gCost + action.getCost(actor, node.simulatedState);
+                    var h = heuristic(newUnsatisfied, graph, actor, node.simulatedState);
                     LOGGER.trace(
                         "  Action cost={} → g={} h={} f={}",
-                        action.getCost(context, node.simulatedState),
+                        action.getCost(actor, node.simulatedState),
                         g,
                         h,
                         g + h
@@ -114,7 +114,7 @@ public final class AOStar {
     private static <T> float heuristic(
         ConditionContainer unsatisfied,
         Graph<T> graph,
-        T context,
+        T actor,
         ReadableWorldState worldState
     ) {
         var h = 0.0f;
@@ -126,7 +126,7 @@ public final class AOStar {
                 var minCost = Float.MAX_VALUE;
 
                 for (var action : candidates) {
-                    var cost = action.getCost(context, worldState);
+                    var cost = action.getCost(actor, worldState);
 
                     if (cost < minCost) {
                         minCost = cost;
