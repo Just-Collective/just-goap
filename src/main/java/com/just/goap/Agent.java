@@ -8,8 +8,10 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 import com.just.goap.graph.Graph;
+import com.just.goap.plan.BestPlanExecutor;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
+import com.just.goap.plan.PlanExecutor;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.SensingWorldState;
 import com.just.goap.state.WorldState;
@@ -28,26 +30,26 @@ public final class Agent<T> {
 
     private final Blackboard graphBlackboard;
 
+    private final PlanExecutor<T> planExecutor;
+
     private final PlanFactory<T> planFactory;
 
     private final WorldState previousWorldState;
 
     private final Debugger debugger;
 
-    private @Nullable Plan<T> currentPlan;
-
     private @Nullable SensingWorldState<T> currentWorldState;
 
     private long tick;
 
-    private Agent(PlanFactory<T> planFactory) {
+    private Agent(PlanExecutor<T> planExecutor, PlanFactory<T> planFactory) {
+        this.planExecutor = planExecutor;
         this.planFactory = planFactory;
         this.previousWorldState = WorldState.create();
         this.blackboard = new Blackboard();
         this.debugger = new Debugger(this);
         this.graphBlackboard = new Blackboard();
 
-        this.currentPlan = null;
         this.currentWorldState = null;
         this.tick = 0;
     }
@@ -56,19 +58,19 @@ public final class Agent<T> {
         debugger.push("Agent.update()");
 
         prepareWorldStates(graph, actor);
-        createPlan(graph, actor);
-        updatePlan(actor);
+        supplyPlansIfNeeded(graph, actor);
+        executePlans(actor);
         tick++;
 
         debugger.pop();
     }
 
     public void abandonPlan() {
-        this.currentPlan = null;
+        planExecutor.abandonAllPlans();
     }
 
     public boolean hasPlan() {
-        return currentPlan != null;
+        return planExecutor.hasActivePlans();
     }
 
     public Blackboard getBlackboard() {
@@ -85,6 +87,13 @@ public final class Agent<T> {
 
     public Debugger getDebugger() {
         return debugger;
+    }
+
+    /**
+     * Returns the plan executor for advanced use cases.
+     */
+    public PlanExecutor<T> getPlanExecutor() {
+        return planExecutor;
     }
 
     private void prepareWorldStates(Graph<T> graph, T actor) {
@@ -105,33 +114,30 @@ public final class Agent<T> {
         currentWorldState.clear();
     }
 
-    private void createPlan(Graph<T> graph, T actor) {
-        if (currentPlan == null) {
-            debugger.push("Agent.createPlan()");
+    private void supplyPlansIfNeeded(Graph<T> graph, T actor) {
+        if (planExecutor.needsPlans()) {
+            debugger.push("Agent.supplyPlans()");
 
             var plans = planFactory.create(graph, actor, currentWorldState, debugger);
-
-            if (!plans.isEmpty()) {
-                this.currentPlan = plans.getFirst();
-            }
+            planExecutor.supplyPlans(plans);
 
             debugger.pop();
         }
     }
 
-    private void updatePlan(T actor) {
-        if (currentPlan != null) {
-            debugger.push("Agent.updatePlan()");
+    private void executePlans(T actor) {
+        debugger.push("Agent.executePlans()");
 
-            var planState = currentPlan.update(this, actor, currentWorldState, previousWorldState);
+        var context = new PlanExecutor.ExecutionContext<>(
+            this,
+            actor,
+            currentWorldState,
+            previousWorldState
+        );
 
-            debugger.pop();
+        planExecutor.execute(context);
 
-            switch (planState) {
-                case ABORTED, FINISHED, INVALID -> this.currentPlan = null;
-                case IN_PROGRESS -> {/* NO-OP */}
-            }
-        }
+        debugger.pop();
     }
 
     public interface PlanFactory<T> {
@@ -141,10 +147,18 @@ public final class Agent<T> {
 
     public static class Builder<T> {
 
+        private PlanExecutor<T> planExecutor;
+
         private PlanFactory<T> planFactory;
 
         private Builder() {
+            this.planExecutor = new BestPlanExecutor<>();
             this.planFactory = DefaultPlanFactory::create;
+        }
+
+        public Builder<T> withPlanExecutor(PlanExecutor<T> planExecutor) {
+            this.planExecutor = planExecutor;
+            return this;
         }
 
         public Builder<T> withPlanFactory(PlanFactory<T> planFactory) {
@@ -153,7 +167,7 @@ public final class Agent<T> {
         }
 
         public Agent<T> build() {
-            return new Agent<>(planFactory);
+            return new Agent<>(planExecutor, planFactory);
         }
     }
 
