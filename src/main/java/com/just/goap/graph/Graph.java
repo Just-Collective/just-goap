@@ -56,6 +56,16 @@ public class Graph<T> {
         return sensorMap;
     }
 
+    public Builder<T> toBuilder() {
+        var builder = Graph.<T>builder();
+
+        availableGoals.forEach(builder::addGoal);
+        availableActions.forEach(builder::addAction);
+        sensorMap.values().forEach(builder::addSensor);
+
+        return builder;
+    }
+
     public static class Builder<T> {
 
         private final Set<Action<? super T>> availableActions;
