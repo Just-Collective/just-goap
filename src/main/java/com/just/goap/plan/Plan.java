@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import com.just.core.functional.function.Lazy;
 import com.just.goap.Agent;
-import com.just.goap.Goal;
 import com.just.goap.action.Action;
+import com.just.goap.goal.Goal;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.ReadableWorldState;
 

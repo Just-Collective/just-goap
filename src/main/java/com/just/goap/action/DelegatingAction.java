@@ -167,16 +167,6 @@ public abstract class DelegatingAction<T> implements Action<T> {
          */
         protected abstract DelegatingAction<T> build(Action<T> delegate);
 
-        /**
-         * Builds the base action and wraps it using {@link #build(Action)}.
-         *
-         * @return The final wrapped action.
-         */
-        public DelegatingAction<T> build() {
-            var baseAction = baseBuilder.build();
-            return build(baseAction);
-        }
-
         // Delegated BaseAction.Builder methods
 
         public <U> B addPrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
@@ -232,6 +222,16 @@ public abstract class DelegatingAction<T> implements Action<T> {
         public B withFinishCallback(Action.FinishCallback<T> finishCallback) {
             baseBuilder.withFinishCallback(finishCallback);
             return self();
+        }
+
+        /**
+         * Builds the base action and wraps it using {@link #build(Action)}.
+         *
+         * @return The final wrapped action.
+         */
+        public DelegatingAction<T> build() {
+            var baseAction = baseBuilder.build();
+            return build(baseAction);
         }
     }
 }

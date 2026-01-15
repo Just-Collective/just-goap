@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.just.goap.Goal;
 import com.just.goap.StateKey;
 import com.just.goap.action.Action;
 import com.just.goap.condition.Condition;
+import com.just.goap.goal.Goal;
 import com.just.goap.sensor.Sensor;
 
 public class Graph<T> {
