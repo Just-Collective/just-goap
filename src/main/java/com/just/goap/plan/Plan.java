@@ -16,11 +16,13 @@ public class Plan<T> {
 
     private final List<Action<? super T>> actions;
 
-    private final Blackboard blackboard;
+    private final Blackboard actionBlackboard;
 
     private final Action.Context<T> actionContext;
 
     private final Lazy<String> actionsString;
+
+    private final Blackboard blackboard;
 
     private int currentActionIndex;
 
@@ -31,9 +33,10 @@ public class Plan<T> {
     public Plan(Goal goal, List<Action<? super T>> actions) {
         this.goal = goal;
         this.actions = actions;
-        this.blackboard = new Blackboard();
+        this.actionBlackboard = new Blackboard();
         this.actionContext = new Action.Context<>();
         this.actionsString = Lazy.of(() -> actions.stream().map(Action::getName).collect(Collectors.joining(", ")));
+        this.blackboard = new Blackboard();
         this.currentActionIndex = 0;
         this.actionTick = 0;
         this.tick = 0;
@@ -59,7 +62,7 @@ public class Plan<T> {
         var currentAction = (Action<T>) actions.get(currentActionIndex);
 
         // Update the reusable action context with current values.
-        actionContext.set(currentAction, actor, agent, this, currentState, previousState, blackboard);
+        actionContext.set(currentAction, actor, agent, actionBlackboard, this, currentState, previousState);
 
         // If the world state already satisfies the effects of the action...
         if (currentState.satisfies(currentAction.getEffectContainer())) {
@@ -84,7 +87,7 @@ public class Plan<T> {
             return State.INVALID;
         }
 
-        var debugger = agent.debugger();
+        var debugger = agent.getDebugger();
 
         if (actionTick == 0) {
             // Trigger onStart callback for the action if the current tick is the first tick.
@@ -111,6 +114,16 @@ public class Plan<T> {
         return actionTick;
     }
 
+    public Blackboard getBlackboard() {
+        return blackboard;
+    }
+
+    public State getPlanState() {
+        return currentActionIndex >= actions.size()
+            ? State.FINISHED
+            : State.IN_PROGRESS;
+    }
+
     public int getTick() {
         return tick;
     }
@@ -120,12 +133,8 @@ public class Plan<T> {
         this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size());
         // Reset the current action tick to 0.
         this.actionTick = 0;
-    }
-
-    private State getPlanState() {
-        return currentActionIndex >= actions.size()
-            ? State.FINISHED
-            : State.IN_PROGRESS;
+        // Clear the action blackboard.
+        actionBlackboard.clear();
     }
 
     @Override
@@ -134,6 +143,7 @@ public class Plan<T> {
             "tick=" + tick +
             ", currentActionIndex=" + currentActionIndex +
             ", actionTick=" + actionTick +
+            ", actionBlackboard=" + actionBlackboard +
             ", blackboard=" + blackboard +
             ", actions=[" + actionsString.get() +
             "], goal=" + goal +

@@ -216,60 +216,65 @@ public class Action<T> {
 
         private Agent<T> agent;
 
+        private Blackboard blackboard;
+
         private Plan<T> plan;
 
         private ReadableWorldState worldState;
 
         private ReadableWorldState previousWorldState;
 
-        private Blackboard blackboard;
-
         public Context() {}
 
-        public Action<T> action() {
+        public Action<T> getAction() {
             return action;
         }
 
-        public T actor() {
+        public T getActor() {
             return actor;
         }
 
-        public Agent<T> agent() {
+        public Agent<T> getAgent() {
             return agent;
         }
 
-        public Plan<T> plan() {
+        public Blackboard getBlackboard(Blackboard.Scope scope) {
+            return switch (scope) {
+                case ACTION -> blackboard;
+                case AGENT -> agent.getBlackboard();
+                case GRAPH -> agent.getGraphBlackboard();
+                case PLAN -> plan.getBlackboard();
+            };
+        }
+
+        public Plan<T> getPlan() {
             return plan;
         }
 
-        public ReadableWorldState worldState() {
+        public ReadableWorldState getWorldState() {
             return worldState;
         }
 
-        public ReadableWorldState previousWorldState() {
+        public ReadableWorldState getPreviousWorldState() {
             return previousWorldState;
-        }
-
-        public Blackboard blackboard() {
-            return blackboard;
         }
 
         public void set(
             Action<T> action,
             T actor,
             Agent<T> agent,
+            Blackboard blackboard,
             Plan<T> plan,
             ReadableWorldState worldState,
-            ReadableWorldState previousWorldState,
-            Blackboard blackboard
+            ReadableWorldState previousWorldState
         ) {
             this.action = action;
             this.actor = actor;
             this.agent = agent;
+            this.blackboard = blackboard;
             this.plan = plan;
             this.worldState = worldState;
             this.previousWorldState = previousWorldState;
-            this.blackboard = blackboard;
         }
     }
 }
