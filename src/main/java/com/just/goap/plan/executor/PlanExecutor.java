@@ -1,8 +1,9 @@
-package com.just.goap.plan;
+package com.just.goap.plan.executor;
 
 import java.util.List;
 
 import com.just.goap.Agent;
+import com.just.goap.plan.Plan;
 import com.just.goap.state.ReadableWorldState;
 
 public interface PlanExecutor<T> {

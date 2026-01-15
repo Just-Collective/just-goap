@@ -1,8 +1,11 @@
-package com.just.goap.plan;
+package com.just.goap.plan.executor.impl;
 
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import com.just.goap.plan.Plan;
+import com.just.goap.plan.executor.PlanExecutor;
 
 public class BestPlanExecutor<T> implements PlanExecutor<T> {
 

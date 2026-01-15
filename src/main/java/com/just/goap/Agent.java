@@ -8,10 +8,10 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 import com.just.goap.graph.Graph;
-import com.just.goap.plan.BestPlanExecutor;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
-import com.just.goap.plan.PlanExecutor;
+import com.just.goap.plan.executor.PlanExecutor;
+import com.just.goap.plan.executor.impl.BestPlanExecutor;
 import com.just.goap.state.Blackboard;
 import com.just.goap.state.SensingWorldState;
 import com.just.goap.state.WorldState;

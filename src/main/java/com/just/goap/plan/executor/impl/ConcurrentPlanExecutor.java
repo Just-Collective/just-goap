@@ -1,15 +1,18 @@
-package com.just.goap.plan;
+package com.just.goap.plan.executor.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.just.goap.plan.Plan;
+import com.just.goap.plan.executor.PlanExecutor;
+
 /**
  * A plan executor that runs multiple non-conflicting plans concurrently.
  * <p>
- * This executor uses a {@link PlanConflictDetector} to determine which plans can run together. Plans that don't
- * conflict with any active plan are started immediately.
+ * This executor uses a {@link ConflictDetector} to determine which plans can run together. Plans that don't conflict
+ * with any active plan are started immediately.
  * <p>
  * The executor can be configured with:
  * <ul>
@@ -53,16 +56,16 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
      * Creates a ConcurrentPlanExecutor with default settings (no conflict detection, unlimited plans).
      */
     public static <T> ConcurrentPlanExecutor<T> create() {
-        return new ConcurrentPlanExecutor<>(PlanConflictDetector.allowAll(), Integer.MAX_VALUE);
+        return new ConcurrentPlanExecutor<>(ConflictDetector.allowAll(), Integer.MAX_VALUE);
     }
 
     private final List<Plan<T>> activePlans;
 
-    private final PlanConflictDetector<T> conflictDetector;
+    private final ConflictDetector<T> conflictDetector;
 
     private final int maxConcurrentPlans;
 
-    private ConcurrentPlanExecutor(PlanConflictDetector<T> conflictDetector, int maxConcurrentPlans) {
+    private ConcurrentPlanExecutor(ConflictDetector<T> conflictDetector, int maxConcurrentPlans) {
         this.activePlans = new ArrayList<>();
         this.conflictDetector = conflictDetector;
         this.maxConcurrentPlans = maxConcurrentPlans;
@@ -168,8 +171,85 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
     /**
      * Returns the conflict detector used by this executor.
      */
-    public PlanConflictDetector<T> getConflictDetector() {
+    public ConflictDetector<T> getConflictDetector() {
         return conflictDetector;
+    }
+
+    /**
+     * Determines whether two plans conflict and cannot run concurrently.
+     * <p>
+     * Implement this interface to define custom conflict detection logic for use with {@link ConcurrentPlanExecutor}.
+     * The executor will check each candidate plan against all currently active plans using this detector.
+     * <p>
+     * Example implementation for resource-based conflicts:
+     *
+     * <pre>{@code
+     *
+     * PlanConflictDetector<Entity> resourceConflict = (planA, planB) -> {
+     *     var resourcesA = extractRequiredResources(planA);
+     *     var resourcesB = extractRequiredResources(planB);
+     *     return !Collections.disjoint(resourcesA, resourcesB);
+     * };
+     * }</pre>
+     *
+     * @param <T> The actor type.
+     */
+    @FunctionalInterface
+    public interface ConflictDetector<T> {
+
+        /**
+         * A detector that reports no conflicts, allowing all plans to run concurrently.
+         */
+        @SuppressWarnings("unchecked")
+        static <T> ConflictDetector<T> allowAll() {
+            return (ConflictDetector<T>) AllowAll.INSTANCE;
+        }
+
+        /**
+         * Returns {@code true} if the two plans conflict and cannot run concurrently, {@code false} if they can run
+         * together.
+         *
+         * @param planA The first plan.
+         * @param planB The second plan.
+         * @return {@code true} if the plans conflict.
+         */
+        boolean conflicts(Plan<T> planA, Plan<T> planB);
+
+        /**
+         * Returns a new detector that reports a conflict if either this detector or the other detector reports a
+         * conflict.
+         *
+         * @param other The other detector to combine with.
+         * @return A combined detector.
+         */
+        default ConflictDetector<T> or(ConflictDetector<T> other) {
+            return (planA, planB) -> this.conflicts(planA, planB) || other.conflicts(planA, planB);
+        }
+
+        /**
+         * Returns a new detector that reports a conflict only if both this detector and the other detector report a
+         * conflict.
+         *
+         * @param other The other detector to combine with.
+         * @return A combined detector.
+         */
+        default ConflictDetector<T> and(ConflictDetector<T> other) {
+            return (planA, planB) -> this.conflicts(planA, planB) && other.conflicts(planA, planB);
+        }
+
+        /**
+         * Internal singleton for the allow-all detector.
+         */
+        enum AllowAll implements ConflictDetector<Object> {
+
+            INSTANCE;
+
+            @Override
+            public boolean conflicts(Plan<Object> planA, Plan<Object> planB) {
+                return false;
+            }
+        }
+
     }
 
     /**
@@ -179,12 +259,12 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
      */
     public static class Builder<T> {
 
-        private PlanConflictDetector<T> conflictDetector;
+        private ConflictDetector<T> conflictDetector;
 
         private int maxConcurrentPlans;
 
         private Builder() {
-            this.conflictDetector = PlanConflictDetector.allowAll();
+            this.conflictDetector = ConflictDetector.allowAll();
             this.maxConcurrentPlans = Integer.MAX_VALUE;
         }
 
@@ -194,7 +274,7 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
          * @param conflictDetector The conflict detector.
          * @return This builder.
          */
-        public Builder<T> withConflictDetector(PlanConflictDetector<T> conflictDetector) {
+        public Builder<T> withConflictDetector(ConflictDetector<T> conflictDetector) {
             this.conflictDetector = conflictDetector;
             return this;
         }
