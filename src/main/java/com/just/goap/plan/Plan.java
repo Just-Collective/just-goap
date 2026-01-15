@@ -24,7 +24,9 @@ public class Plan<T> {
 
     private int currentActionIndex;
 
-    private int currentActionTick;
+    private int actionTick;
+
+    private int tick;
 
     public Plan(Goal goal, List<Action<? super T>> actions) {
         this.goal = goal;
@@ -33,11 +35,23 @@ public class Plan<T> {
         this.actionContext = new Action.Context<>();
         this.actionsString = Lazy.of(() -> actions.stream().map(Action::getName).collect(Collectors.joining(", ")));
         this.currentActionIndex = 0;
-        this.currentActionTick = 0;
+        this.actionTick = 0;
+        this.tick = 0;
+    }
+
+    public State update(Agent<T> agent, T actor, ReadableWorldState currentState, ReadableWorldState previousState) {
+        var state = updatePlan(agent, actor, currentState, previousState);
+        tick++;
+        return state;
     }
 
     @SuppressWarnings("unchecked")
-    public State update(Agent<T> agent, T actor, ReadableWorldState currentState, ReadableWorldState previousState) {
+    private State updatePlan(
+        Agent<T> agent,
+        T actor,
+        ReadableWorldState currentState,
+        ReadableWorldState previousState
+    ) {
         if (getPlanState() == State.FINISHED) {
             return State.FINISHED;
         }
@@ -72,7 +86,7 @@ public class Plan<T> {
 
         var debugger = agent.debugger();
 
-        if (currentActionTick == 0) {
+        if (actionTick == 0) {
             // Trigger onStart callback for the action if the current tick is the first tick.
             debugger.push("Action '" + currentAction.getName() + "' onStart()");
             currentAction.onStart(actionContext);
@@ -85,7 +99,7 @@ public class Plan<T> {
         debugger.pop();
 
         // Increment the current action tick after performing the action.
-        currentActionTick++;
+        actionTick++;
 
         return switch (signal) {
             case ABORT -> State.ABORTED;
@@ -93,15 +107,19 @@ public class Plan<T> {
         };
     }
 
-    public int getCurrentActionTick() {
-        return currentActionTick;
+    public int getActionTick() {
+        return actionTick;
+    }
+
+    public int getTick() {
+        return tick;
     }
 
     private void proceedToNextAction() {
         // Move to the next action index.
         this.currentActionIndex = Math.clamp(this.currentActionIndex + 1, 0, actions.size());
         // Reset the current action tick to 0.
-        this.currentActionTick = 0;
+        this.actionTick = 0;
     }
 
     private State getPlanState() {
