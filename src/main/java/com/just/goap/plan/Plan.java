@@ -131,7 +131,9 @@ public class Plan<T> {
     @Override
     public String toString() {
         return "Plan{" +
-            "currentActionIndex=" + currentActionIndex +
+            "tick=" + tick +
+            ", currentActionIndex=" + currentActionIndex +
+            ", actionTick=" + actionTick +
             ", blackboard=" + blackboard +
             ", actions=[" + actionsString.get() +
             "], goal=" + goal +
