@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.just.goap.AOStar;
-import com.just.goap.Action;
 import com.just.goap.Agent;
+import com.just.goap.action.Action;
 import com.just.goap.graph.Graph;
 import com.just.goap.state.ReadableWorldState;
 

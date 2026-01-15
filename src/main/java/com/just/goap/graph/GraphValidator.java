@@ -9,9 +9,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.just.goap.Action;
 import com.just.goap.Goal;
 import com.just.goap.StateKey;
+import com.just.goap.action.Action;
 import com.just.goap.condition.Condition;
 import com.just.goap.sensor.Sensor;
 

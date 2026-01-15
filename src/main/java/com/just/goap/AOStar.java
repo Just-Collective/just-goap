@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.just.goap.action.Action;
 import com.just.goap.condition.ConditionContainer;
 import com.just.goap.graph.Graph;
 import com.just.goap.state.ReadableWorldState;
