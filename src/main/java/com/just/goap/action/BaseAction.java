@@ -55,15 +55,15 @@ public class BaseAction<T> implements Action<T> {
         return costCallback.apply(actor, worldState);
     }
 
-    public Signal perform(Context<T> context) {
+    public Signal perform(Context<? extends T> context) {
         return performCallback.accept(context);
     }
 
-    public void onStart(Context<T> context) {
+    public void onStart(Context<? extends T> context) {
         startCallback.apply(context);
     }
 
-    public void onFinish(Context<T> context) {
+    public void onFinish(Context<? extends T> context) {
         finishCallback.apply(context);
     }
 

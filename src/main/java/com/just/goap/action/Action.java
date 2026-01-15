@@ -15,11 +15,11 @@ public interface Action<T> {
 
     float getCost(T actor, ReadableWorldState worldState);
 
-    Signal perform(Context<T> context);
+    Signal perform(Context<? extends T> context);
 
-    void onStart(Context<T> context);
+    void onStart(Context<? extends T> context);
 
-    void onFinish(Context<T> context);
+    void onFinish(Context<? extends T> context);
 
     ConditionContainer getPreconditionContainer();
 
@@ -41,19 +41,19 @@ public interface Action<T> {
     @FunctionalInterface
     interface StartCallback<T> {
 
-        void apply(Context<T> context);
+        void apply(Context<? extends T> context);
     }
 
     @FunctionalInterface
     interface PerformCallback<T> {
 
-        Signal accept(Context<T> context);
+        Signal accept(Context<? extends T> context);
     }
 
     @FunctionalInterface
     interface FinishCallback<T> {
 
-        void apply(Context<T> context);
+        void apply(Context<? extends T> context);
     }
 
     final class Context<T> {

@@ -57,17 +57,17 @@ public abstract class DelegatingAction<T> implements Action<T> {
     }
 
     @Override
-    public Signal perform(Context<T> context) {
+    public Signal perform(Context<? extends T> context) {
         return delegate.perform(context);
     }
 
     @Override
-    public void onStart(Context<T> context) {
+    public void onStart(Context<? extends T> context) {
         delegate.onStart(context);
     }
 
     @Override
-    public void onFinish(Context<T> context) {
+    public void onFinish(Context<? extends T> context) {
         delegate.onFinish(context);
     }
 
