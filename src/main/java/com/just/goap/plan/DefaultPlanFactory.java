@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.just.goap.AOStar;
+import com.just.goap.Action;
 import com.just.goap.Agent;
 import com.just.goap.graph.Graph;
 import com.just.goap.state.ReadableWorldState;
@@ -32,15 +33,18 @@ public class DefaultPlanFactory {
             var desiredConditions = goal.getDesiredConditions();
 
             debugger.push("AOStar.solve() for goal '" + goal.getName() + "'");
-            var actions = AOStar.solve(graph, desiredConditions, worldState, actor);
+            var actionsWithCosts = AOStar.solve(graph, desiredConditions, worldState, actor);
             debugger.pop();
 
-            if (actions != null && !actions.isEmpty()) {
-                // FIXME: The cost-per-action here is evaluated using the wrong world state. We need to use the
-                // simulated state.
+            if (actionsWithCosts != null && !actionsWithCosts.isEmpty()) {
+                // Sum the costs already computed by AOStar (using correct simulated world states).
                 var cost = 0.0f;
-                for (var action : actions) {
-                    cost += action.getCost(actor, worldState);
+                // Extract just the actions for the plan.
+                var actions = new ArrayList<Action<? super T>>(actionsWithCosts.size());
+
+                for (var actionWithCost : actionsWithCosts) {
+                    cost += actionWithCost.cost();
+                    actions.add(actionWithCost.action());
                 }
 
                 plans.add(new PlanWithCost<>(new Plan<>(goal, actions), cost));

@@ -20,7 +20,7 @@ public final class AOStar {
 
     private static final Comparator<AOStarNode<?>> F_COST_COMPARATOR = Comparator.comparingDouble(node -> node.fCost);
 
-    public static <T> @Nullable List<Action<? super T>> solve(
+    public static <T> @Nullable List<ActionWithCost<? super T>> solve(
         Graph<T> graph,
         ConditionContainer desiredConditions,
         ReadableWorldState currentWorldState,
@@ -87,20 +87,17 @@ public final class AOStar {
 
                     LOGGER.trace("  New unsatisfied after action: {}", newUnsatisfied.getConditions());
 
+                    // Compute action cost using the current simulated state.
+                    var actionCost = action.getCost(actor, node.simulatedState);
+
                     // Build plan so far.
                     var newPlan = new ArrayList<>(node.planSoFar);
-                    newPlan.add(action);
+                    newPlan.add(new ActionWithCost<>(action, actionCost));
 
                     // Costs.
-                    var g = node.gCost + action.getCost(actor, node.simulatedState);
+                    var g = node.gCost + actionCost;
                     var h = heuristic(newUnsatisfied, graph, actor, node.simulatedState);
-                    LOGGER.trace(
-                        "  Action cost={} → g={} h={} f={}",
-                        action.getCost(actor, node.simulatedState),
-                        g,
-                        h,
-                        g + h
-                    );
+                    LOGGER.trace("  Action cost={} → g={} h={} f={}", actionCost, g, h, g + h);
 
                     open.add(new AOStarNode<>(newUnsatisfied, newPlan, newState, g, h));
                 }
@@ -147,7 +144,7 @@ public final class AOStar {
 
     record AOStarNode<T>(
         ConditionContainer unsatisfiedConditions,
-        List<Action<? super T>> planSoFar,
+        List<ActionWithCost<? super T>> planSoFar,
         SimulatedWorldState simulatedState,
         // cost so far.
         float gCost,
@@ -159,7 +156,7 @@ public final class AOStar {
 
         AOStarNode(
             ConditionContainer unsatisfiedConditions,
-            List<Action<? super T>> planSoFar,
+            List<ActionWithCost<? super T>> planSoFar,
             SimulatedWorldState simulatedState,
             float gCost,
             float hCost
@@ -167,4 +164,16 @@ public final class AOStar {
             this(unsatisfiedConditions, planSoFar, simulatedState, gCost, hCost, gCost + hCost);
         }
     }
+
+    /**
+     * Pairs an {@link Action} with its computed cost from the planning algorithm.
+     *
+     * @param action The action.
+     * @param cost   The cost of executing this action, computed using the simulated world state.
+     * @param <T>    The actor type.
+     */
+    public record ActionWithCost<T>(
+        Action<? super T> action,
+        float cost
+    ) {}
 }
