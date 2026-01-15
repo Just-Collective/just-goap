@@ -1,5 +1,6 @@
 package com.just.goap.plan;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,28 @@ public class Plan<T> {
         var state = updatePlan(agent, actor, currentState, previousState);
         tick++;
         return state;
+    }
+
+    public List<Action<? super T>> getActions() {
+        return actions;
+    }
+
+    public int getActionTick() {
+        return actionTick;
+    }
+
+    public Blackboard getBlackboard() {
+        return blackboard;
+    }
+
+    public State getPlanState() {
+        return currentActionIndex >= actions.size()
+            ? State.FINISHED
+            : State.IN_PROGRESS;
+    }
+
+    public int getTick() {
+        return tick;
     }
 
     @SuppressWarnings("unchecked")
@@ -112,24 +135,6 @@ public class Plan<T> {
             case ABORT -> State.ABORTED;
             case CONTINUE -> State.IN_PROGRESS;
         };
-    }
-
-    public int getActionTick() {
-        return actionTick;
-    }
-
-    public Blackboard getBlackboard() {
-        return blackboard;
-    }
-
-    public State getPlanState() {
-        return currentActionIndex >= actions.size()
-            ? State.FINISHED
-            : State.IN_PROGRESS;
-    }
-
-    public int getTick() {
-        return tick;
     }
 
     private void proceedToNextAction() {
