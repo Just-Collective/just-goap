@@ -10,6 +10,7 @@ import java.util.List;
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
+import com.just.goap.state.Blackboard;
 import com.just.goap.state.SensingWorldState;
 import com.just.goap.state.WorldState;
 
@@ -22,6 +23,10 @@ public final class Agent<T> {
     public static <T> Builder<T> builder() {
         return new Builder<>();
     }
+
+    private final Blackboard blackboard;
+
+    private final Blackboard graphBlackboard;
 
     private final PlanFactory<T> planFactory;
 
@@ -38,7 +43,9 @@ public final class Agent<T> {
     private Agent(PlanFactory<T> planFactory) {
         this.planFactory = planFactory;
         this.previousWorldState = WorldState.create();
+        this.blackboard = new Blackboard();
         this.debugger = new Debugger(this);
+        this.graphBlackboard = new Blackboard();
 
         this.currentPlan = null;
         this.currentWorldState = null;
@@ -64,6 +71,14 @@ public final class Agent<T> {
         return currentPlan != null;
     }
 
+    public Blackboard getBlackboard() {
+        return blackboard;
+    }
+
+    public Blackboard getGraphBlackboard() {
+        return graphBlackboard;
+    }
+
     public long getTick() {
         return tick;
     }
@@ -76,6 +91,8 @@ public final class Agent<T> {
         if (currentWorldState == null || currentWorldState.getGraph() != graph) {
             // Create a new world state if the current world state is null or the graph has changed.
             this.currentWorldState = new SensingWorldState<>(graph);
+            // Clear the graph blackboard for the initial sensor world state or if the graph changed.
+            graphBlackboard.clear();
         }
 
         // Always update the actor here.
