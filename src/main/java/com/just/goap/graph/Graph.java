@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import com.just.goap.StateKey;
 import com.just.goap.action.Action;
@@ -172,9 +172,8 @@ public class Graph<T> {
             return this;
         }
 
-        public Builder<T> apply(Consumer<Builder<T>> builderConsumer) {
-            builderConsumer.accept(this);
-            return this;
+        public Builder<T> apply(UnaryOperator<Builder<T>> unaryOperator) {
+            return unaryOperator.apply(this);
         }
 
         public Graph<T> build() {
