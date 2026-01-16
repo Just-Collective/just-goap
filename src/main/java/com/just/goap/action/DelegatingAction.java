@@ -204,6 +204,10 @@ public abstract class DelegatingAction<T> implements Action<T> {
             return self();
         }
 
+        public B withCost(float cost) {
+            return withCostCallback(($1, $2) -> cost);
+        }
+
         public B withCostCallback(Action.CostCallback<T> costCallback) {
             baseBuilder.withCostCallback(costCallback);
             return self();
