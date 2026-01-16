@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import com.just.goap.plan.Plan;
 import com.just.goap.plan.PlanComparator;
@@ -397,6 +398,10 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
 
             this.maxConcurrentPlans = maxConcurrentPlans;
             return this;
+        }
+
+        public Builder<T> apply(UnaryOperator<Builder<T>> unaryOperator) {
+            return unaryOperator.apply(this);
         }
 
         /**
