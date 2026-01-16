@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
@@ -186,6 +187,10 @@ public final class Agent<T> {
         public Builder<T> withReplanPolicy(ReplanPolicy<T> replanPolicy) {
             this.replanPolicy = replanPolicy;
             return this;
+        }
+
+        public Builder<T> apply(UnaryOperator<Builder<T>> unaryOperator) {
+            return unaryOperator.apply(this);
         }
 
         public Agent<T> build() {
