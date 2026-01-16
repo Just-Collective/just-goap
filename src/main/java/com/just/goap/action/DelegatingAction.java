@@ -224,6 +224,10 @@ public abstract class DelegatingAction<T> implements Action<T> {
             return self();
         }
 
+        public B apply(UnaryOperator<B> unaryOperator) {
+            return unaryOperator.apply(self());
+        }
+
         /**
          * Builds the base action and wraps it using {@link #build(Action)}.
          *
