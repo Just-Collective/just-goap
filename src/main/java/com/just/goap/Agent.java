@@ -81,6 +81,10 @@ public final class Agent<T> {
         return planExecutor.hasActivePlans();
     }
 
+    public T getActor() {
+        return actor;
+    }
+
     public Blackboard getBlackboard() {
         return blackboard;
     }
