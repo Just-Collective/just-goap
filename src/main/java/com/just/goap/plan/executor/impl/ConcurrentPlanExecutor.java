@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.just.goap.plan.Plan;
+import com.just.goap.plan.PlanComparator;
 import com.just.goap.plan.executor.PlanExecutor;
 
 /**
@@ -53,10 +54,10 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     /**
-     * Creates a ConcurrentPlanExecutor with default settings (no conflict detection, unlimited plans).
+     * Creates a ConcurrentPlanExecutor with default settings (same-goal conflict detection, unlimited plans).
      */
     public static <T> ConcurrentPlanExecutor<T> create() {
-        return new ConcurrentPlanExecutor<>(ConflictDetector.allowAll(), Integer.MAX_VALUE);
+        return new ConcurrentPlanExecutor<>(ConflictDetector.sameGoal(), Integer.MAX_VALUE);
     }
 
     private final List<Plan<T>> activePlans;
@@ -199,6 +200,15 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
         }
 
         /**
+         * A detector that reports a conflict when two plans have the same goal. This prevents duplicate plans from
+         * running concurrently.
+         */
+        @SuppressWarnings("unchecked")
+        static <T> ConflictDetector<T> sameGoal() {
+            return (ConflictDetector<T>) SameGoal.INSTANCE;
+        }
+
+        /**
          * Returns {@code true} if the two plans conflict and cannot run concurrently, {@code false} if they can run
          * together.
          *
@@ -243,6 +253,19 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
             }
         }
 
+        /**
+         * Internal singleton for the same-goal detector.
+         */
+        enum SameGoal implements ConflictDetector<Object> {
+
+            INSTANCE;
+
+            @Override
+            public boolean conflicts(Plan<Object> planA, Plan<Object> planB) {
+                return PlanComparator.hasSameGoal(planA, planB);
+            }
+        }
+
     }
 
     /**
@@ -257,7 +280,7 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
         private int maxConcurrentPlans;
 
         private Builder() {
-            this.conflictDetector = ConflictDetector.allowAll();
+            this.conflictDetector = ConflictDetector.sameGoal();
             this.maxConcurrentPlans = Integer.MAX_VALUE;
         }
 
