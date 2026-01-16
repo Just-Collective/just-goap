@@ -12,28 +12,32 @@ import com.just.goap.plan.executor.PlanExecutor;
 /**
  * A plan executor that runs multiple non-conflicting plans concurrently.
  * <p>
- * This executor uses a {@link ConflictDetector} to determine which plans can run together. Plans that don't conflict
- * with any active plan are started immediately.
+ * This executor uses a {@link PlanResolver} to determine how to handle conflicts between plans. When a candidate plan
+ * conflicts with an active plan, the resolver decides whether to keep the active plan, replace it with the candidate,
+ * reject both, or allow both to run concurrently.
  * <p>
  * The executor can be configured with:
  * <ul>
- * <li>A conflict detector (default: allow all plans)</li>
+ * <li>A plan resolver (default: prefer cheaper plan for same goal)</li>
  * <li>A maximum number of concurrent plans (default: unlimited)</li>
  * </ul>
  * <p>
- * Example usage with custom conflict detection:
+ * Example usage with custom resolution:
  *
  * <pre>{@code
  *
- * // Define a conflict detector based on your custom action metadata
- * PlanConflictDetector<Entity> detector = (planA, planB) -> {
- *     var capabilitiesA = extractCapabilities(planA);
- *     var capabilitiesB = extractCapabilities(planB);
- *     return !Collections.disjoint(capabilitiesA, capabilitiesB);
+ * PlanResolver<Entity> resolver = (active, candidate) -> {
+ *     if (hasResourceConflict(active, candidate)) {
+ *         // Keep whichever plan is cheaper
+ *         return candidate.getCost() < active.getCost()
+ *             ? Resolution.REPLACE_ACTIVE
+ *             : Resolution.KEEP_ACTIVE;
+ *     }
+ *     return Resolution.NO_CONFLICT;
  * };
  *
  * var executor = ConcurrentPlanExecutor.<Entity>builder()
- *     .withConflictDetector(detector)
+ *     .withPlanResolver(resolver)
  *     .withMaxConcurrentPlans(3)
  *     .build();
  *
@@ -54,21 +58,21 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     /**
-     * Creates a ConcurrentPlanExecutor with default settings (same-goal conflict detection, unlimited plans).
+     * Creates a ConcurrentPlanExecutor with default settings (prefer cheaper same-goal plans, unlimited plans).
      */
     public static <T> ConcurrentPlanExecutor<T> create() {
-        return new ConcurrentPlanExecutor<>(ConflictDetector.sameGoal(), Integer.MAX_VALUE);
+        return new ConcurrentPlanExecutor<>(PlanResolver.preferCheaperSameGoal(), Integer.MAX_VALUE);
     }
 
     private final List<Plan<T>> activePlans;
 
-    private final ConflictDetector<T> conflictDetector;
+    private final PlanResolver<T> planResolver;
 
     private final int maxConcurrentPlans;
 
-    private ConcurrentPlanExecutor(ConflictDetector<T> conflictDetector, int maxConcurrentPlans) {
+    private ConcurrentPlanExecutor(PlanResolver<T> planResolver, int maxConcurrentPlans) {
         this.activePlans = new ArrayList<>();
-        this.conflictDetector = conflictDetector;
+        this.planResolver = planResolver;
         this.maxConcurrentPlans = maxConcurrentPlans;
     }
 
@@ -112,23 +116,63 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
                 break;
             }
 
-            if (canAddPlan(candidate)) {
-                activePlans.add(candidate);
-            }
+            processCandidate(candidate);
         }
     }
 
     /**
-     * Checks if a candidate plan can be added without conflicting with active plans.
+     * Processes a candidate plan by resolving conflicts with active plans.
      */
-    private boolean canAddPlan(Plan<T> candidate) {
+    private void processCandidate(Plan<T> candidate) {
+        List<Plan<T>> toRemove = null;
+        boolean acceptCandidate = true;
+
         for (var active : activePlans) {
-            if (conflictDetector.conflicts(candidate, active)) {
-                return false;
+            var resolution = planResolver.resolve(active, candidate);
+
+            switch (resolution) {
+                case KEEP_ACTIVE -> {
+                    // Reject candidate, keep active - stop processing this candidate
+                    acceptCandidate = false;
+                }
+                case REPLACE_ACTIVE -> {
+                    // Accept candidate, remove active
+                    if (toRemove == null) {
+                        toRemove = new ArrayList<>();
+                    }
+
+                    toRemove.add(active);
+                }
+                case REJECT_BOTH -> {
+                    // Reject candidate and remove active
+                    acceptCandidate = false;
+
+                    if (toRemove == null) {
+                        toRemove = new ArrayList<>();
+                    }
+
+                    toRemove.add(active);
+                }
+                case NO_CONFLICT -> {
+                    // Continue checking other active plans
+                }
+            }
+
+            if (!acceptCandidate && resolution != PlanResolver.Resolution.REJECT_BOTH) {
+                // If we're rejecting the candidate (but not removing active plans), stop early
+                break;
             }
         }
 
-        return true;
+        // Remove any plans marked for removal
+        if (toRemove != null) {
+            activePlans.removeAll(toRemove);
+        }
+
+        // Add candidate if accepted and we have capacity
+        if (acceptCandidate && activePlans.size() < maxConcurrentPlans) {
+            activePlans.add(candidate);
+        }
     }
 
     @Override
@@ -163,109 +207,131 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     /**
-     * Returns the conflict detector used by this executor.
+     * Returns the plan resolver used by this executor.
      */
-    public ConflictDetector<T> getConflictDetector() {
-        return conflictDetector;
+    public PlanResolver<T> getPlanResolver() {
+        return planResolver;
     }
 
     /**
-     * Determines whether two plans conflict and cannot run concurrently.
+     * Resolves conflicts between an active plan and an incoming candidate plan.
      * <p>
-     * Implement this interface to define custom conflict detection logic for use with {@link ConcurrentPlanExecutor}.
-     * The executor will check each candidate plan against all currently active plans using this detector.
-     * <p>
-     * Example implementation for resource-based conflicts:
-     *
-     * <pre>{@code
-     *
-     * PlanConflictDetector<Entity> resourceConflict = (planA, planB) -> {
-     *     var resourcesA = extractRequiredResources(planA);
-     *     var resourcesB = extractRequiredResources(planB);
-     *     return !Collections.disjoint(resourcesA, resourcesB);
-     * };
-     * }</pre>
+     * Implement this interface to define custom resolution logic for use with {@link ConcurrentPlanExecutor}. The
+     * executor will check each candidate plan against all currently active plans using this resolver.
      *
      * @param <T> The actor type.
      */
     @FunctionalInterface
-    public interface ConflictDetector<T> {
+    public interface PlanResolver<T> {
 
         /**
-         * A detector that reports no conflicts, allowing all plans to run concurrently.
+         * A resolver that reports no conflicts, allowing all plans to run concurrently.
          */
         @SuppressWarnings("unchecked")
-        static <T> ConflictDetector<T> allowAll() {
-            return (ConflictDetector<T>) AllowAll.INSTANCE;
+        static <T> PlanResolver<T> allowAll() {
+            return (PlanResolver<T>) AllowAll.INSTANCE;
         }
 
         /**
-         * A detector that reports a conflict when two plans have the same goal. This prevents duplicate plans from
-         * running concurrently.
+         * A resolver that rejects candidates with the same goal as an active plan. The active plan is always kept.
          */
         @SuppressWarnings("unchecked")
-        static <T> ConflictDetector<T> sameGoal() {
-            return (ConflictDetector<T>) SameGoal.INSTANCE;
+        static <T> PlanResolver<T> rejectSameGoal() {
+            return (PlanResolver<T>) RejectSameGoal.INSTANCE;
         }
 
         /**
-         * Returns {@code true} if the two plans conflict and cannot run concurrently, {@code false} if they can run
-         * together.
-         *
-         * @param planA The first plan.
-         * @param planB The second plan.
-         * @return {@code true} if the plans conflict.
+         * A resolver that prefers the cheaper plan when two plans have the same goal. If the candidate is cheaper, it
+         * replaces the active plan. Otherwise, the candidate is rejected.
          */
-        boolean conflicts(Plan<T> planA, Plan<T> planB);
-
-        /**
-         * Returns a new detector that reports a conflict if either this detector or the other detector reports a
-         * conflict.
-         *
-         * @param other The other detector to combine with.
-         * @return A combined detector.
-         */
-        default ConflictDetector<T> or(ConflictDetector<T> other) {
-            return (planA, planB) -> this.conflicts(planA, planB) || other.conflicts(planA, planB);
+        @SuppressWarnings("unchecked")
+        static <T> PlanResolver<T> preferCheaperSameGoal() {
+            return (PlanResolver<T>) PreferCheaperSameGoal.INSTANCE;
         }
 
         /**
-         * Returns a new detector that reports a conflict only if both this detector and the other detector report a
-         * conflict.
+         * Resolves a conflict between an active plan and an incoming candidate plan.
          *
-         * @param other The other detector to combine with.
-         * @return A combined detector.
+         * @param active    The currently running plan.
+         * @param candidate The incoming plan being considered.
+         * @return The resolution decision.
          */
-        default ConflictDetector<T> and(ConflictDetector<T> other) {
-            return (planA, planB) -> this.conflicts(planA, planB) && other.conflicts(planA, planB);
+        Resolution resolve(Plan<T> active, Plan<T> candidate);
+
+        /**
+         * The resolution decision for a conflict between two plans.
+         */
+        enum Resolution {
+            /**
+             * Keep the active plan, reject the candidate.
+             */
+            KEEP_ACTIVE,
+
+            /**
+             * Replace the active plan with the candidate.
+             */
+            REPLACE_ACTIVE,
+
+            /**
+             * Reject both the active plan and the candidate.
+             */
+            REJECT_BOTH,
+
+            /**
+             * Keep the active plan and also accept the candidate (no conflict).
+             */
+            NO_CONFLICT
         }
 
         /**
-         * Internal singleton for the allow-all detector.
+         * Internal singleton for the allow-all resolver.
          */
-        enum AllowAll implements ConflictDetector<Object> {
+        enum AllowAll implements PlanResolver<Object> {
 
             INSTANCE;
 
             @Override
-            public boolean conflicts(Plan<Object> planA, Plan<Object> planB) {
-                return false;
+            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+                return Resolution.NO_CONFLICT;
             }
         }
 
         /**
-         * Internal singleton for the same-goal detector.
+         * Internal singleton for the reject-same-goal resolver.
          */
-        enum SameGoal implements ConflictDetector<Object> {
+        enum RejectSameGoal implements PlanResolver<Object> {
 
             INSTANCE;
 
             @Override
-            public boolean conflicts(Plan<Object> planA, Plan<Object> planB) {
-                return PlanComparator.hasSameGoal(planA, planB);
+            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+                if (PlanComparator.hasSameGoal(active, candidate)) {
+                    return Resolution.KEEP_ACTIVE;
+                }
+
+                return Resolution.NO_CONFLICT;
             }
         }
 
+        /**
+         * Internal singleton for the prefer-cheaper-same-goal resolver.
+         */
+        enum PreferCheaperSameGoal implements PlanResolver<Object> {
+
+            INSTANCE;
+
+            @Override
+            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+                if (!PlanComparator.hasSameGoal(active, candidate)) {
+                    return Resolution.NO_CONFLICT;
+                }
+
+                // Same goal - keep the cheaper one
+                return candidate.getCost() < active.getCost()
+                    ? Resolution.REPLACE_ACTIVE
+                    : Resolution.KEEP_ACTIVE;
+            }
+        }
     }
 
     /**
@@ -275,23 +341,23 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
      */
     public static class Builder<T> {
 
-        private ConflictDetector<T> conflictDetector;
+        private PlanResolver<T> planResolver;
 
         private int maxConcurrentPlans;
 
         private Builder() {
-            this.conflictDetector = ConflictDetector.sameGoal();
+            this.planResolver = PlanResolver.preferCheaperSameGoal();
             this.maxConcurrentPlans = Integer.MAX_VALUE;
         }
 
         /**
-         * Sets the conflict detector used to determine which plans can run concurrently.
+         * Sets the plan resolver used to determine how to handle conflicts between plans.
          *
-         * @param conflictDetector The conflict detector.
+         * @param planResolver The plan resolver.
          * @return This builder.
          */
-        public Builder<T> withConflictDetector(ConflictDetector<T> conflictDetector) {
-            this.conflictDetector = conflictDetector;
+        public Builder<T> withPlanResolver(PlanResolver<T> planResolver) {
+            this.planResolver = planResolver;
             return this;
         }
 
@@ -316,7 +382,7 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
          * @return The configured executor.
          */
         public ConcurrentPlanExecutor<T> build() {
-            return new ConcurrentPlanExecutor<>(conflictDetector, maxConcurrentPlans);
+            return new ConcurrentPlanExecutor<>(planResolver, maxConcurrentPlans);
         }
     }
 }

@@ -17,6 +17,8 @@ public class Plan<T> {
 
     private final List<Action<? super T>> actions;
 
+    private final float cost;
+
     private final Blackboard actionBlackboard;
 
     private final Action.Context<T> actionContext;
@@ -31,9 +33,10 @@ public class Plan<T> {
 
     private int tick;
 
-    public Plan(Goal goal, List<Action<? super T>> actions) {
+    public Plan(Goal goal, List<Action<? super T>> actions, float cost) {
         this.goal = goal;
         this.actions = Collections.unmodifiableList(actions);
+        this.cost = cost;
         this.actionBlackboard = new Blackboard();
         this.actionContext = new Action.Context<>();
         this.actionsString = Lazy.of(
@@ -59,6 +62,10 @@ public class Plan<T> {
 
     public List<Action<? super T>> getActions() {
         return actions;
+    }
+
+    public float getCost() {
+        return cost;
     }
 
     public int getActionTick() {
@@ -154,6 +161,7 @@ public class Plan<T> {
     public String toString() {
         return "Plan{" +
             "tick=" + tick +
+            ", cost=" + cost +
             ", currentActionIndex=" + currentActionIndex +
             ", actionTick=" + actionTick +
             ", actionBlackboard=" + actionBlackboard +

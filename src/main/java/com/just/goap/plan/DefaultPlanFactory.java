@@ -18,7 +18,7 @@ public class DefaultPlanFactory {
         ReadableWorldState worldState,
         Agent.Debugger debugger
     ) {
-        var plans = new ArrayList<PlanWithCost<T>>();
+        var plans = new ArrayList<Plan<T>>();
 
         for (var goal : graph.getAvailableGoals()) {
             debugger.push("Goal '" + goal.getName() + "' precondition check");
@@ -47,26 +47,15 @@ public class DefaultPlanFactory {
                     actions.add(actionWithCost.action());
                 }
 
-                plans.add(new PlanWithCost<>(new Plan<>(goal, actions), cost));
+                plans.add(new Plan<>(goal, actions, cost));
             }
         }
 
-        // Sort by cost (lowest first) and extract plans.
-        plans.sort(Comparator.comparingDouble(planWithCost -> planWithCost.cost));
+        // Sort by cost (lowest first).
+        plans.sort(Comparator.comparingDouble(Plan::getCost));
 
-        var result = new ArrayList<Plan<T>>(plans.size());
-
-        for (var planWithCost : plans) {
-            result.add(planWithCost.plan);
-        }
-
-        return result;
+        return plans;
     }
-
-    private record PlanWithCost<T>(
-        Plan<T> plan,
-        float cost
-    ) {}
 
     private DefaultPlanFactory() {
         throw new UnsupportedOperationException();
