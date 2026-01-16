@@ -1,5 +1,7 @@
 package com.just.goap.goal;
 
+import java.util.function.UnaryOperator;
+
 import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
 import com.just.goap.condition.ConditionContainer;
@@ -116,6 +118,10 @@ public abstract class DelegatingGoal implements Goal {
         public B withName(String name) {
             baseBuilder.withName(name);
             return self();
+        }
+
+        public B apply(UnaryOperator<B> unaryOperator) {
+            return unaryOperator.apply(self());
         }
 
         /**
