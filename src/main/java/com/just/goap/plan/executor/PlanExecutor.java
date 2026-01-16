@@ -17,17 +17,11 @@ public interface PlanExecutor<T> {
     Result execute(ExecutionContext<T> context);
 
     /**
-     * Provides new plans to the executor. Called by the Agent when {@link #needsPlans()} returns true.
+     * Provides new plans to the executor.
      *
      * @param plans The available plans, sorted by cost (lowest first).
      */
     void supplyPlans(List<Plan<T>> plans);
-
-    /**
-     * Returns true if the executor needs new plans from the plan factory. The Agent will call the PlanFactory and then
-     * {@link #supplyPlans(List)} when this returns true.
-     */
-    boolean needsPlans();
 
     /**
      * Returns true if the executor has at least one active plan being executed.

@@ -51,11 +51,6 @@ public class BestPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     @Override
-    public boolean needsPlans() {
-        return currentPlan == null;
-    }
-
-    @Override
     public boolean hasActivePlans() {
         return currentPlan != null;
     }

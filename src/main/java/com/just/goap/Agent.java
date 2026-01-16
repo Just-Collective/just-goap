@@ -10,6 +10,8 @@ import java.util.List;
 import com.just.goap.graph.Graph;
 import com.just.goap.plan.DefaultPlanFactory;
 import com.just.goap.plan.Plan;
+import com.just.goap.plan.ReplanPolicies;
+import com.just.goap.plan.ReplanPolicy;
 import com.just.goap.plan.executor.PlanExecutor;
 import com.just.goap.plan.executor.impl.BestPlanExecutor;
 import com.just.goap.state.Blackboard;
@@ -30,28 +32,31 @@ public final class Agent<T> {
 
     private final Blackboard blackboard;
 
+    private final Debugger debugger;
+
     private final Blackboard graphBlackboard;
 
     private final PlanExecutor<T> planExecutor;
 
     private final PlanFactory<T> planFactory;
 
-    private final WorldState previousWorldState;
+    private final ReplanPolicy<T> replanPolicy;
 
-    private final Debugger debugger;
+    private final WorldState previousWorldState;
 
     private @Nullable SensingWorldState<T> currentWorldState;
 
     private long tick;
 
-    private Agent(T actor, PlanExecutor<T> planExecutor, PlanFactory<T> planFactory) {
+    private Agent(T actor, PlanExecutor<T> planExecutor, PlanFactory<T> planFactory, ReplanPolicy<T> replanPolicy) {
         this.actor = actor;
-        this.planExecutor = planExecutor;
-        this.planFactory = planFactory;
-        this.previousWorldState = WorldState.create();
         this.blackboard = new Blackboard();
         this.debugger = new Debugger(this);
         this.graphBlackboard = new Blackboard();
+        this.planExecutor = planExecutor;
+        this.planFactory = planFactory;
+        this.previousWorldState = WorldState.create();
+        this.replanPolicy = replanPolicy;
 
         this.currentWorldState = null;
         this.tick = 0;
@@ -80,23 +85,20 @@ public final class Agent<T> {
         return blackboard;
     }
 
-    public Blackboard getGraphBlackboard() {
-        return graphBlackboard;
-    }
-
-    public long getTick() {
-        return tick;
-    }
-
     public Debugger getDebugger() {
         return debugger;
     }
 
-    /**
-     * Returns the plan executor for advanced use cases.
-     */
+    public Blackboard getGraphBlackboard() {
+        return graphBlackboard;
+    }
+
     public PlanExecutor<T> getPlanExecutor() {
         return planExecutor;
+    }
+
+    public long getTick() {
+        return tick;
     }
 
     private void prepareWorldStates(Graph<T> graph, T actor) {
@@ -118,12 +120,14 @@ public final class Agent<T> {
     }
 
     private void supplyPlansIfNeeded(Graph<T> graph, T actor) {
-        if (planExecutor.needsPlans()) {
-            debugger.push("Agent.supplyPlans()");
+        var context = new ReplanPolicy.Context<T>(planExecutor.hasActivePlans());
 
+        if (replanPolicy.shouldReplan(context)) {
+            debugger.push("planFactory.create()");
             var plans = planFactory.create(graph, actor, currentWorldState, debugger);
+            debugger.pop();
+            debugger.push("Agent.supplyPlans()");
             planExecutor.supplyPlans(plans);
-
             debugger.pop();
         }
     }
@@ -156,10 +160,13 @@ public final class Agent<T> {
 
         private PlanFactory<T> planFactory;
 
+        private ReplanPolicy<T> replanPolicy;
+
         private Builder(T actor) {
             this.actor = actor;
             this.planExecutor = new BestPlanExecutor<>();
             this.planFactory = DefaultPlanFactory::create;
+            this.replanPolicy = ReplanPolicies.ifNoActivePlans();
         }
 
         public Builder<T> withPlanExecutor(PlanExecutor<T> planExecutor) {
@@ -172,8 +179,13 @@ public final class Agent<T> {
             return this;
         }
 
+        public Builder<T> withReplanPolicy(ReplanPolicy<T> replanPolicy) {
+            this.replanPolicy = replanPolicy;
+            return this;
+        }
+
         public Agent<T> build() {
-            return new Agent<>(actor, planExecutor, planFactory);
+            return new Agent<>(actor, planExecutor, planFactory, replanPolicy);
         }
     }
 
