@@ -53,6 +53,10 @@ public class Plan<T> {
         return state;
     }
 
+    public Goal getGoal() {
+        return goal;
+    }
+
     public List<Action<? super T>> getActions() {
         return actions;
     }
