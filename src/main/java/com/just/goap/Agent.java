@@ -18,13 +18,15 @@ import com.just.goap.state.WorldState;
 
 public final class Agent<T> {
 
-    public static <T> Agent<T> create() {
-        return Agent.<T>builder().build();
+    public static <T> Agent<T> create(T actor) {
+        return Agent.builder(actor).build();
     }
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
+    public static <T> Builder<T> builder(T actor) {
+        return new Builder<>(actor);
     }
+
+    private final T actor;
 
     private final Blackboard blackboard;
 
@@ -42,7 +44,8 @@ public final class Agent<T> {
 
     private long tick;
 
-    private Agent(PlanExecutor<T> planExecutor, PlanFactory<T> planFactory) {
+    private Agent(T actor, PlanExecutor<T> planExecutor, PlanFactory<T> planFactory) {
+        this.actor = actor;
         this.planExecutor = planExecutor;
         this.planFactory = planFactory;
         this.previousWorldState = WorldState.create();
@@ -54,7 +57,7 @@ public final class Agent<T> {
         this.tick = 0;
     }
 
-    public void update(Graph<T> graph, T actor) {
+    public void update(Graph<T> graph) {
         debugger.push("Agent.update()");
 
         prepareWorldStates(graph, actor);
@@ -147,11 +150,14 @@ public final class Agent<T> {
 
     public static class Builder<T> {
 
+        private final T actor;
+
         private PlanExecutor<T> planExecutor;
 
         private PlanFactory<T> planFactory;
 
-        private Builder() {
+        private Builder(T actor) {
+            this.actor = actor;
             this.planExecutor = new BestPlanExecutor<>();
             this.planFactory = DefaultPlanFactory::create;
         }
@@ -167,7 +173,7 @@ public final class Agent<T> {
         }
 
         public Agent<T> build() {
-            return new Agent<>(planExecutor, planFactory);
+            return new Agent<>(actor, planExecutor, planFactory);
         }
     }
 

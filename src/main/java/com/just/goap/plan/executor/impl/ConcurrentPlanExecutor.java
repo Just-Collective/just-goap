@@ -132,8 +132,6 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
 
     @Override
     public boolean needsPlans() {
-        // Request new plans when we have no active plans
-        // Subclasses can override to request plans more aggressively
         return activePlans.isEmpty();
     }
 
