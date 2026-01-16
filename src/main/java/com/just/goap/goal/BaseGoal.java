@@ -3,6 +3,7 @@ package com.just.goap.goal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import com.just.goap.StateKey;
 import com.just.goap.condition.Condition;
@@ -96,6 +97,10 @@ public class BaseGoal implements Goal {
         public B withName(String name) {
             this.name = name;
             return self();
+        }
+
+        public B apply(UnaryOperator<B> unaryOperator) {
+            return unaryOperator.apply(self());
         }
 
         public BaseGoal build() {
