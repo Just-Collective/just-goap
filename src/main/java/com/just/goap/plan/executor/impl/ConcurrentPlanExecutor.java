@@ -8,6 +8,7 @@ import java.util.List;
 import com.just.goap.plan.Plan;
 import com.just.goap.plan.PlanComparator;
 import com.just.goap.plan.executor.PlanExecutor;
+import com.just.goap.state.ReadableWorldState;
 
 /**
  * A plan executor that runs multiple non-conflicting plans concurrently.
@@ -26,10 +27,12 @@ import com.just.goap.plan.executor.PlanExecutor;
  *
  * <pre>{@code
  *
- * PlanResolver<Entity> resolver = (active, candidate) -> {
+ * PlanResolver<Entity> resolver = (active, candidate, actor, worldState) -> {
  *     if (hasResourceConflict(active, candidate)) {
- *         // Keep whichever plan is cheaper
- *         return candidate.getCost() < active.getCost()
+ *         // Keep whichever plan is cheaper based on current world state
+ *         float activeCost = active.getRemainingCost(actor, worldState);
+ *         float candidateCost = candidate.getCost();
+ *         return candidateCost < activeCost
  *             ? Resolution.REPLACE_ACTIVE
  *             : Resolution.KEEP_ACTIVE;
  *     }
@@ -110,25 +113,25 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     @Override
-    public void supplyPlans(List<Plan<T>> plans) {
+    public void supplyPlans(List<Plan<T>> plans, T actor, ReadableWorldState worldState) {
         for (var candidate : plans) {
             if (activePlans.size() >= maxConcurrentPlans) {
                 break;
             }
 
-            processCandidate(candidate);
+            processCandidate(candidate, actor, worldState);
         }
     }
 
     /**
      * Processes a candidate plan by resolving conflicts with active plans.
      */
-    private void processCandidate(Plan<T> candidate) {
+    private void processCandidate(Plan<T> candidate, T actor, ReadableWorldState worldState) {
         List<Plan<T>> toRemove = null;
         boolean acceptCandidate = true;
 
         for (var active : activePlans) {
-            var resolution = planResolver.resolve(active, candidate);
+            var resolution = planResolver.resolve(active, candidate, actor, worldState);
 
             switch (resolution) {
                 case KEEP_ACTIVE -> {
@@ -241,8 +244,8 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
         }
 
         /**
-         * A resolver that prefers the cheaper plan when two plans have the same goal. If the candidate is cheaper, it
-         * replaces the active plan. Otherwise, the candidate is rejected.
+         * A resolver that prefers the cheaper plan when two plans have the same goal. Uses the active plan's remaining
+         * cost (based on current world state) for accurate comparison.
          */
         @SuppressWarnings("unchecked")
         static <T> PlanResolver<T> preferCheaperSameGoal() {
@@ -252,11 +255,13 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
         /**
          * Resolves a conflict between an active plan and an incoming candidate plan.
          *
-         * @param active    The currently running plan.
-         * @param candidate The incoming plan being considered.
+         * @param active     The currently running plan.
+         * @param candidate  The incoming plan being considered.
+         * @param actor      The actor for cost calculations.
+         * @param worldState The current world state for cost calculations.
          * @return The resolution decision.
          */
-        Resolution resolve(Plan<T> active, Plan<T> candidate);
+        Resolution resolve(Plan<T> active, Plan<T> candidate, T actor, ReadableWorldState worldState);
 
         /**
          * The resolution decision for a conflict between two plans.
@@ -291,7 +296,12 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
             INSTANCE;
 
             @Override
-            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+            public Resolution resolve(
+                Plan<Object> active,
+                Plan<Object> candidate,
+                Object actor,
+                ReadableWorldState worldState
+            ) {
                 return Resolution.NO_CONFLICT;
             }
         }
@@ -304,7 +314,12 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
             INSTANCE;
 
             @Override
-            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+            public Resolution resolve(
+                Plan<Object> active,
+                Plan<Object> candidate,
+                Object actor,
+                ReadableWorldState worldState
+            ) {
                 if (PlanComparator.hasSameGoal(active, candidate)) {
                     return Resolution.KEEP_ACTIVE;
                 }
@@ -321,13 +336,21 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
             INSTANCE;
 
             @Override
-            public Resolution resolve(Plan<Object> active, Plan<Object> candidate) {
+            public Resolution resolve(
+                Plan<Object> active,
+                Plan<Object> candidate,
+                Object actor,
+                ReadableWorldState worldState
+            ) {
                 if (!PlanComparator.hasSameGoal(active, candidate)) {
                     return Resolution.NO_CONFLICT;
                 }
 
-                // Same goal - keep the cheaper one
-                return candidate.getCost() < active.getCost()
+                // Same goal - compare remaining cost of active plan vs full cost of candidate
+                float activeRemainingCost = active.getRemainingCost(actor, worldState);
+                float candidateCost = candidate.getInitialCost();
+
+                return candidateCost < activeRemainingCost
                     ? Resolution.REPLACE_ACTIVE
                     : Resolution.KEEP_ACTIVE;
             }

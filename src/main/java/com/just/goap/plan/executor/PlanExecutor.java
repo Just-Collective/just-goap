@@ -19,9 +19,11 @@ public interface PlanExecutor<T> {
     /**
      * Provides new plans to the executor.
      *
-     * @param plans The available plans, sorted by cost (lowest first).
+     * @param plans      The available plans, sorted by cost (lowest first).
+     * @param actor      The actor for cost calculations.
+     * @param worldState The current world state for cost calculations.
      */
-    void supplyPlans(List<Plan<T>> plans);
+    void supplyPlans(List<Plan<T>> plans, T actor, ReadableWorldState worldState);
 
     /**
      * Returns true if the executor has at least one active plan being executed.

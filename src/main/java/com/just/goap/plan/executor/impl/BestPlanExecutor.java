@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.just.goap.plan.Plan;
 import com.just.goap.plan.executor.PlanExecutor;
+import com.just.goap.state.ReadableWorldState;
 
 public class BestPlanExecutor<T> implements PlanExecutor<T> {
 
@@ -43,7 +44,7 @@ public class BestPlanExecutor<T> implements PlanExecutor<T> {
     }
 
     @Override
-    public void supplyPlans(List<Plan<T>> plans) {
+    public void supplyPlans(List<Plan<T>> plans, T actor, ReadableWorldState worldState) {
         if (!plans.isEmpty() && currentPlan == null) {
             // Select the best (first) plan
             this.currentPlan = plans.getFirst();

@@ -127,7 +127,7 @@ public final class Agent<T> {
             var plans = planFactory.create(graph, actor, currentWorldState, debugger);
             debugger.pop();
             debugger.push("Agent.supplyPlans()");
-            planExecutor.supplyPlans(plans);
+            planExecutor.supplyPlans(plans, actor, currentWorldState);
             debugger.pop();
         }
     }

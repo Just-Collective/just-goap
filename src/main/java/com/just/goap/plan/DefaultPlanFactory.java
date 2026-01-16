@@ -52,7 +52,7 @@ public class DefaultPlanFactory {
         }
 
         // Sort by cost (lowest first).
-        plans.sort(Comparator.comparingDouble(Plan::getCost));
+        plans.sort(Comparator.comparingDouble(Plan::getInitialCost));
 
         return plans;
     }

@@ -17,7 +17,7 @@ public class Plan<T> {
 
     private final List<Action<? super T>> actions;
 
-    private final float cost;
+    private final float initialCost;
 
     private final Blackboard actionBlackboard;
 
@@ -33,10 +33,10 @@ public class Plan<T> {
 
     private int tick;
 
-    public Plan(Goal goal, List<Action<? super T>> actions, float cost) {
+    public Plan(Goal goal, List<Action<? super T>> actions, float initialCost) {
         this.goal = goal;
         this.actions = Collections.unmodifiableList(actions);
-        this.cost = cost;
+        this.initialCost = initialCost;
         this.actionBlackboard = new Blackboard();
         this.actionContext = new Action.Context<>();
         this.actionsString = Lazy.of(
@@ -56,16 +56,8 @@ public class Plan<T> {
         return state;
     }
 
-    public Goal getGoal() {
-        return goal;
-    }
-
     public List<Action<? super T>> getActions() {
         return actions;
-    }
-
-    public float getCost() {
-        return cost;
     }
 
     public int getActionTick() {
@@ -76,10 +68,38 @@ public class Plan<T> {
         return blackboard;
     }
 
+    public Goal getGoal() {
+        return goal;
+    }
+
+    public float getInitialCost() {
+        return initialCost;
+    }
+
     public State getPlanState() {
         return currentActionIndex >= actions.size()
             ? State.FINISHED
             : State.IN_PROGRESS;
+    }
+
+    /**
+     * Calculates the cost of the remaining actions in this plan based on the current world state.
+     * <p>
+     * This is useful for comparing plans during execution, as the original cost may be stale.
+     *
+     * @param actor      The actor executing the plan.
+     * @param worldState The current world state.
+     * @return The sum of costs for all remaining actions (including the current action).
+     */
+    public float getRemainingCost(T actor, ReadableWorldState worldState) {
+        var remainingCost = 0.0f;
+
+        for (var i = currentActionIndex; i < actions.size(); i++) {
+            var action = actions.get(i);
+            remainingCost += action.getCost(actor, worldState);
+        }
+
+        return remainingCost;
     }
 
     public int getTick() {
@@ -161,7 +181,7 @@ public class Plan<T> {
     public String toString() {
         return "Plan{" +
             "tick=" + tick +
-            ", cost=" + cost +
+            ", cost=" + initialCost +
             ", currentActionIndex=" + currentActionIndex +
             ", actionTick=" + actionTick +
             ", actionBlackboard=" + actionBlackboard +
