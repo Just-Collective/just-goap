@@ -163,6 +163,10 @@ public class BaseAction<T> implements Action<T> {
             return self();
         }
 
+        public B apply(UnaryOperator<B> unaryOperator) {
+            return unaryOperator.apply(self());
+        }
+
         public BaseAction<T> build() {
             if (effects.isEmpty()) {
                 throw new IllegalStateException("Action must have at least one effect.");
