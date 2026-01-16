@@ -124,7 +124,7 @@ public final class Agent<T> {
     }
 
     private void supplyPlansIfNeeded(Graph<T> graph, T actor) {
-        var context = new ReplanPolicy.Context<T>(planExecutor.hasActivePlans());
+        var context = new ReplanPolicy.Context<>(this, graph, currentWorldState, previousWorldState);
 
         if (replanPolicy.shouldReplan(context)) {
             debugger.push("planFactory.create()");

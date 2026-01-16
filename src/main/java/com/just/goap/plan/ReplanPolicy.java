@@ -1,5 +1,9 @@
 package com.just.goap.plan;
 
+import com.just.goap.Agent;
+import com.just.goap.graph.Graph;
+import com.just.goap.state.ReadableWorldState;
+
 /**
  * Determines when an agent should request new plans.
  *
@@ -19,8 +23,12 @@ public interface ReplanPolicy<T> {
     /**
      * Context provided to a {@link ReplanPolicy} for evaluation.
      *
-     * @param <T>            The actor type.
-     * @param hasActivePlans Whether the executor currently has active plans.
+     * @param <T> The actor type.
      */
-    record Context<T>(boolean hasActivePlans) {}
+    record Context<T>(
+        Agent<T> agent,
+        Graph<T> graph,
+        ReadableWorldState worldState,
+        ReadableWorldState previousWorldState
+    ) {}
 }
