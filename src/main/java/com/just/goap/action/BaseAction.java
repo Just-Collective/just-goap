@@ -143,6 +143,10 @@ public class BaseAction<T> implements Action<T> {
             return self();
         }
 
+        public B withCost(float cost) {
+            return withCostCallback(($1, $2) -> cost);
+        }
+
         public B withCostCallback(CostCallback<T> costCallback) {
             this.costCallback = costCallback;
             return self();
