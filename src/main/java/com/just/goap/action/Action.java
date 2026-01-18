@@ -23,6 +23,10 @@ public interface Action<T> {
 
     ConditionContainer getPreconditionContainer();
 
+    ConditionContainer getPlanTimePreconditionContainer();
+
+    ConditionContainer getRuntimePreconditionContainer();
+
     EffectContainer getEffectContainer();
 
     String getName();

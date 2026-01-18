@@ -140,7 +140,7 @@ public class Plan<T> {
         }
 
         // Always check the current action's preconditions before running the action.
-        if (!currentAction.getPreconditionContainer().satisfiedBy(currentState)) {
+        if (!currentAction.getRuntimePreconditionContainer().satisfiedBy(currentState)) {
             currentAction.onFinish(actionContext);
             return State.INVALID;
         }

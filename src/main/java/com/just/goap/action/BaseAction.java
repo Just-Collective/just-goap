@@ -19,7 +19,9 @@ public class BaseAction<T> implements Action<T> {
         return new ConcreteBuilder<>(name);
     }
 
-    private final ConditionContainer preconditions;
+    private final ConditionContainer planTimePreconditions;
+
+    private final ConditionContainer runtimePreconditions;
 
     private final EffectContainer effects;
 
@@ -35,7 +37,8 @@ public class BaseAction<T> implements Action<T> {
 
     protected BaseAction(
         String name,
-        ConditionContainer conditionContainer,
+        ConditionContainer planTimePreconditions,
+        ConditionContainer runtimePreconditions,
         EffectContainer effectContainer,
         CostCallback<T> costCallback,
         StartCallback<T> startCallback,
@@ -43,7 +46,8 @@ public class BaseAction<T> implements Action<T> {
         FinishCallback<T> finishCallback
     ) {
         this.name = name;
-        this.preconditions = conditionContainer;
+        this.planTimePreconditions = planTimePreconditions;
+        this.runtimePreconditions = runtimePreconditions;
         this.effects = effectContainer;
         this.costCallback = costCallback;
         this.startCallback = startCallback;
@@ -68,7 +72,15 @@ public class BaseAction<T> implements Action<T> {
     }
 
     public ConditionContainer getPreconditionContainer() {
-        return preconditions;
+        return planTimePreconditions.union(runtimePreconditions);
+    }
+
+    public ConditionContainer getPlanTimePreconditionContainer() {
+        return planTimePreconditions;
+    }
+
+    public ConditionContainer getRuntimePreconditionContainer() {
+        return runtimePreconditions;
     }
 
     public EffectContainer getEffectContainer() {
@@ -86,7 +98,9 @@ public class BaseAction<T> implements Action<T> {
 
     public abstract static class Builder<T, B extends Builder<T, B>> {
 
-        protected final List<Condition<?>> preconditions;
+        protected final List<Condition<?>> planTimePreconditions;
+
+        protected final List<Condition<?>> runtimePreconditions;
 
         protected final List<Effect<?>> effects;
 
@@ -101,7 +115,8 @@ public class BaseAction<T> implements Action<T> {
         protected String name;
 
         protected Builder(String name) {
-            this.preconditions = new ArrayList<>();
+            this.planTimePreconditions = new ArrayList<>();
+            this.runtimePreconditions = new ArrayList<>();
             this.effects = new ArrayList<>();
             this.name = name;
             this.costCallback = ($1, $2) -> 0;
@@ -121,7 +136,34 @@ public class BaseAction<T> implements Action<T> {
         }
 
         public B addPrecondition(Condition<?> condition) {
-            preconditions.add(condition);
+            planTimePreconditions.add(condition);
+            runtimePreconditions.add(condition);
+            return self();
+        }
+
+        public <U> B addPlanTimePrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
+            return addPlanTimePrecondition(Condition.derived(key, expression));
+        }
+
+        public <U> B addPlanTimePrecondition(StateKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            return addPlanTimePrecondition(Condition.sensed(key, expression));
+        }
+
+        public B addPlanTimePrecondition(Condition<?> condition) {
+            planTimePreconditions.add(condition);
+            return self();
+        }
+
+        public <U> B addRuntimePrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
+            return addRuntimePrecondition(Condition.derived(key, expression));
+        }
+
+        public <U> B addRuntimePrecondition(StateKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            return addRuntimePrecondition(Condition.sensed(key, expression));
+        }
+
+        public B addRuntimePrecondition(Condition<?> condition) {
+            runtimePreconditions.add(condition);
             return self();
         }
 
@@ -178,7 +220,8 @@ public class BaseAction<T> implements Action<T> {
 
             return new BaseAction<>(
                 name,
-                ConditionContainer.of(Collections.unmodifiableList(preconditions)),
+                ConditionContainer.of(Collections.unmodifiableList(planTimePreconditions)),
+                ConditionContainer.of(Collections.unmodifiableList(runtimePreconditions)),
                 EffectContainer.of(Collections.unmodifiableList(effects)),
                 costCallback,
                 startCallback,

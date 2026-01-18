@@ -77,6 +77,16 @@ public abstract class DelegatingAction<T> implements Action<T> {
     }
 
     @Override
+    public ConditionContainer getPlanTimePreconditionContainer() {
+        return delegate.getPlanTimePreconditionContainer();
+    }
+
+    @Override
+    public ConditionContainer getRuntimePreconditionContainer() {
+        return delegate.getRuntimePreconditionContainer();
+    }
+
+    @Override
     public EffectContainer getEffectContainer() {
         return delegate.getEffectContainer();
     }
@@ -181,6 +191,36 @@ public abstract class DelegatingAction<T> implements Action<T> {
 
         public B addPrecondition(Condition<?> condition) {
             baseBuilder.addPrecondition(condition);
+            return self();
+        }
+
+        public <U> B addPlanTimePrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
+            baseBuilder.addPlanTimePrecondition(key, expression);
+            return self();
+        }
+
+        public <U> B addPlanTimePrecondition(StateKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            baseBuilder.addPlanTimePrecondition(key, expression);
+            return self();
+        }
+
+        public B addPlanTimePrecondition(Condition<?> condition) {
+            baseBuilder.addPlanTimePrecondition(condition);
+            return self();
+        }
+
+        public <U> B addRuntimePrecondition(StateKey.Derived<? extends U> key, Expression<? super U> expression) {
+            baseBuilder.addRuntimePrecondition(key, expression);
+            return self();
+        }
+
+        public <U> B addRuntimePrecondition(StateKey.Sensed<? extends U> key, Expression<? super U> expression) {
+            baseBuilder.addRuntimePrecondition(key, expression);
+            return self();
+        }
+
+        public B addRuntimePrecondition(Condition<?> condition) {
+            baseBuilder.addRuntimePrecondition(condition);
             return self();
         }
 
