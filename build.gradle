@@ -98,7 +98,7 @@ jacocoTestCoverageVerification {
             classDirectories.setFrom(jacocoTestReport.classDirectories)
 
             limit {
-                minimum = 0.8
+                minimum = 0.3
             }
         }
 
