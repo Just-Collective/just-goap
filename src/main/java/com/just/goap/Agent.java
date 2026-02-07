@@ -16,6 +16,7 @@ import com.just.goap.plan.ReplanPolicy;
 import com.just.goap.plan.executor.PlanExecutor;
 import com.just.goap.plan.executor.impl.BestPlanExecutor;
 import com.just.goap.state.Blackboard;
+import com.just.goap.state.ReadableWorldState;
 import com.just.goap.state.SensingWorldState;
 import com.just.goap.state.WorldState;
 
@@ -88,6 +89,10 @@ public final class Agent<T> {
 
     public Blackboard getBlackboard() {
         return blackboard;
+    }
+
+    public @Nullable ReadableWorldState getCurrentWorldState() {
+        return currentWorldState;
     }
 
     public Debugger getDebugger() {

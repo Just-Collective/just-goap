@@ -1,5 +1,6 @@
 package com.just.goap.state;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +14,10 @@ public class Blackboard {
 
     public Blackboard() {
         this.stateMap = new HashMap<>();
+    }
+
+    public Map<StateKey<?>, Object> getStateMap() {
+        return Collections.unmodifiableMap(stateMap);
     }
 
     public <T> T getOrNull(StateKey<T> key) {

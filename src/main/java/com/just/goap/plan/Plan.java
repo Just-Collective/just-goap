@@ -60,12 +60,20 @@ public class Plan<T> {
         return actions;
     }
 
+    public Blackboard getActionBlackboard() {
+        return actionBlackboard;
+    }
+
     public int getActionTick() {
         return actionTick;
     }
 
     public Blackboard getBlackboard() {
         return blackboard;
+    }
+
+    public int getCurrentActionIndex() {
+        return currentActionIndex;
     }
 
     public Goal getGoal() {
