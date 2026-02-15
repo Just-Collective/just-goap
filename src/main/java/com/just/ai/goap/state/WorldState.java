@@ -1,0 +1,54 @@
+package com.just.ai.goap.state;
+
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.just.ai.goap.StateKey;
+import com.just.ai.goap.effect.EffectContainer;
+
+public interface WorldState extends ReadableWorldState, WritableWorldState {
+
+    static WorldState create() {
+        return create(new HashMap<>());
+    }
+
+    static WorldState create(Map<StateKey<?>, Object> stateMap) {
+        return new WorldState() {
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public <T> @Nullable T getOrNull(StateKey<T> key) {
+                return (T) stateMap.get(key);
+            }
+
+            @Override
+            public Map<StateKey<?>, Object> getMap() {
+                return stateMap;
+            }
+
+            @Override
+            public <T> void set(StateKey<T> key, T value) {
+                stateMap.put(key, value);
+            }
+
+            @Override
+            public void setAll(Map<StateKey<?>, Object> map) {
+                stateMap.putAll(map);
+            }
+
+            @Override
+            public void apply(EffectContainer effectContainer) {
+                for (var effect : effectContainer.getEffects()) {
+                    effect.apply(this);
+                }
+            }
+
+            @Override
+            public void clear() {
+                stateMap.clear();
+            }
+        };
+    }
+}
