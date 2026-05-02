@@ -12,10 +12,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew test
 
 # Run a single test class
-./gradlew test --tests "com.just.goap.AgentTest"
+./gradlew test --tests "com.just.ai.goap.AgentTest"
 
 # Run a single test method
-./gradlew test --tests "com.just.goap.AgentTest.testMethodName"
+./gradlew test --tests "com.just.ai.goap.AgentTest.testMethodName"
 
 # Format code (automatically runs on build)
 ./gradlew spotlessApply
@@ -61,13 +61,13 @@ Goals have:
 
 ### Package Structure
 
-- `com.just.goap`: Core types (Agent, Action, Goal, StateKey, AOStar)
-- `com.just.goap.condition`: Condition and Expression system for preconditions
-- `com.just.goap.effect`: Effect types for action outcomes
-- `com.just.goap.graph`: Graph builder and validator
-- `com.just.goap.plan`: Plan execution logic
-- `com.just.goap.sensor`: Sensor interfaces (Mono, Multi) and composition utilities
-- `com.just.goap.state`: World state implementations (WorldState, SensingWorldState, SimulatedWorldState)
+- `com.just.ai.goap`: Core types (Agent, Action, Goal, StateKey, AOStar)
+- `com.just.ai.goap.condition`: Condition and Expression system for preconditions
+- `com.just.ai.goap.effect`: Effect types for action outcomes
+- `com.just.ai.goap.graph`: Graph builder and validator
+- `com.just.ai.goap.plan`: Plan execution logic
+- `com.just.ai.goap.sensor`: Sensor interfaces (Mono, Multi) and composition utilities
+- `com.just.ai.goap.state`: World state implementations (WorldState, SensingWorldState, SimulatedWorldState)
 
 ## Code Style
 

@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 import com.just.ai.goap.plan.Plan;
 import com.just.ai.goap.plan.PlanComparator;
 import com.just.ai.goap.plan.executor.PlanExecutor;
+import com.just.ai.goap.plan.scorer.PlanScorer;
 import com.just.ai.goap.state.ReadableWorldState;
 
 /**
@@ -251,6 +252,25 @@ public class ConcurrentPlanExecutor<T> implements PlanExecutor<T> {
         @SuppressWarnings("unchecked")
         static <T> PlanResolver<T> preferCheaperSameGoal() {
             return (PlanResolver<T>) PreferCheaperSameGoal.INSTANCE;
+        }
+
+        /**
+         * A resolver that prefers the higher-scoring plan when two plans have the same goal.
+         */
+        static <T> PlanResolver<T> preferHigherScore(PlanScorer<T> scorer) {
+            return (active, candidate, actor, worldState) -> {
+                if (!PlanComparator.hasSameGoal(active, candidate)) {
+                    return Resolution.NO_CONFLICT;
+                }
+
+                var allPlans = List.of(active, candidate);
+                var activeScore = scorer.score(active, actor, worldState, allPlans);
+                var candidateScore = scorer.score(candidate, actor, worldState, allPlans);
+
+                return candidateScore > activeScore
+                    ? Resolution.REPLACE_ACTIVE
+                    : Resolution.KEEP_ACTIVE;
+            };
         }
 
         /**

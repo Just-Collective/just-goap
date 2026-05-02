@@ -15,6 +15,7 @@ import com.just.ai.goap.plan.ReplanPolicies;
 import com.just.ai.goap.plan.ReplanPolicy;
 import com.just.ai.goap.plan.executor.PlanExecutor;
 import com.just.ai.goap.plan.executor.impl.BestPlanExecutor;
+import com.just.ai.goap.plan.scorer.PlanScorers;
 import com.just.ai.goap.state.Blackboard;
 import com.just.ai.goap.state.ReadableWorldState;
 import com.just.ai.goap.state.SensingWorldState;
@@ -174,7 +175,7 @@ public final class Agent<T> {
 
         private Builder(T actor) {
             this.actor = actor;
-            this.planExecutor = new BestPlanExecutor<>();
+            this.planExecutor = new BestPlanExecutor<>(PlanScorers.costEfficiency());
             this.planFactory = DefaultPlanFactory::create;
             this.replanPolicy = ReplanPolicies.ifNoActivePlans();
         }
